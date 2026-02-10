@@ -8,7 +8,6 @@ import static frc.robot.Constants.*;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import frc.robot.Constants.DriveConstants;
 
 /** Add your docs here. */
@@ -39,10 +38,7 @@ public final class Configs {
 
     static {
       // Configure basic settings of the drive motors
-      frontLeftConfig
-          .idleMode(IdleMode.kBrake)
-          .smartCurrentLimit(50)
-          .voltageCompensation(12);
+      frontLeftConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
 
       rearLeftConfig
           .idleMode(IdleMode.kBrake)
@@ -75,7 +71,7 @@ public final class Configs {
           .smartCurrentLimit(50)
           .voltageCompensation(12)
           .inverted(true);
-      
+
       /*
        * Configure the closed loop controller. We want to make sure we set the
        * feedback sensor as the primary encoder.
@@ -100,7 +96,7 @@ public final class Configs {
           .smartCurrentLimit(50)
           .voltageCompensation(12)
           .follow(ShooterConstants.kLeftShooterCanId, true);
-      
+
       /*
        * Configure the closed loop controller. We want to make sure we set the
        * feedback sensor as the primary encoder.
