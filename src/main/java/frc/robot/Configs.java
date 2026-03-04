@@ -115,5 +115,17 @@ public final class Configs {
       //     .maxAcceleration(6000)
       //     .allowedClosedLoopError(0.5);
     }
+      public static final class Intake {
+    public static final SparkMaxConfig IntakeConfig = new SparkMaxConfig();
+
+    static {
+      // Configure basic settings of the intake motor
+      IntakeConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
+    }
+  }
+
+ 
   }
 }
+  
+

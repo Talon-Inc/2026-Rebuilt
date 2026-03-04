@@ -2,8 +2,10 @@ package frc.robot.subsystems.shooter;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public class ShooterIO {
-  // --- Primary Set (Bottom) ---
+public interface ShooterIO {
+  @AutoLog
+  public static class ShooterIOInputs {
+    // --- Primary Set (Bottom) ---
     public double primaryLeaderRPM = 0.0;
     public double primaryLeaderVolts = 0.0;
     public double[] primaryLeaderAmps = new double[] {};
@@ -29,9 +31,9 @@ public class ShooterIO {
     public double secondaryHoodVolts = 0.0;
 
     public boolean hoodsConnected = false;
-}
+  }
 
-// Updates the set of loggable inputs
+  // Updates the set of loggable inputs
   public default void updateInputs(ShooterIOInputs inputs) {}
 
   // Run the shooters (Volts)
@@ -46,3 +48,4 @@ public class ShooterIO {
 
   // Configure PID Constants (Optional If tuning Via Advantage Scope)
   public default void configurePID(double kP, double kI, double kD) {}
+}
