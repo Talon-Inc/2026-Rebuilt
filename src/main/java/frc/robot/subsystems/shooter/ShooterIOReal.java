@@ -6,20 +6,22 @@ package frc.robot.subsystems.shooter;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterIOReal implements ShooterIO {
   // Primary Set
-  private final SparkMax primaryLeader;
-  private final SparkMax primaryFollower;
+  private final SparkFlex primaryLeader;
+  private final SparkFlex primaryFollower;
 
   // Secondary Set (Optional)
-  private final SparkMax secondaryLeader;
-  private final SparkMax secondaryFollower;
+  private final SparkFlex secondaryLeader;
+  private final SparkFlex secondaryFollower;
 
   // Hoods
   private final SparkMax primaryHood;
@@ -27,8 +29,8 @@ public class ShooterIOReal implements ShooterIO {
 
   public ShooterIOReal() {
     // --- 1. Primary Flywheel Setup ---
-    primaryLeader = new SparkMax(ShooterConstants.kPrimaryLeaderID, MotorType.kBrushless);
-    primaryFollower = new SparkMax(ShooterConstants.kPrimaryFollowerID, MotorType.kBrushless);
+    primaryLeader = new SparkFlex(ShooterConstants.kPrimaryLeaderID, MotorType.kBrushless);
+    primaryFollower = new SparkFlex(ShooterConstants.kPrimaryFollowerID, MotorType.kBrushless);
 
     // Configure Leader
     configureLeader(primaryLeader);
@@ -38,8 +40,8 @@ public class ShooterIOReal implements ShooterIO {
 
     // --- 2. Secondary Flywheel Setup ---
     if (ShooterConstants.kIsDoubleFlywheel) {
-      secondaryLeader = new SparkMax(ShooterConstants.kSecondaryLeaderID, MotorType.kBrushless);
-      secondaryFollower = new SparkMax(ShooterConstants.kSecondaryFollowerID, MotorType.kBrushless);
+      secondaryLeader = new SparkFlex(ShooterConstants.kSecondaryLeaderID, MotorType.kBrushless);
+      secondaryFollower = new SparkFlex(ShooterConstants.kSecondaryFollowerID, MotorType.kBrushless);
 
       configureLeader(secondaryLeader);
       configureFollower(secondaryFollower, secondaryLeader, true);
@@ -64,8 +66,8 @@ public class ShooterIOReal implements ShooterIO {
     }
   }
 
-  private void configureLeader(SparkMax motor) {
-    SparkMaxConfig config = new SparkMaxConfig();
+  private void configureLeader(SparkFlex motor) {
+    SparkFlexConfig config = new SparkFlexConfig();
 
     config.idleMode(IdleMode.kCoast);
 
@@ -75,8 +77,8 @@ public class ShooterIOReal implements ShooterIO {
     motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  private void configureFollower(SparkMax follower, SparkMax leader, boolean inverted) {
-    SparkMaxConfig config = new SparkMaxConfig();
+  private void configureFollower(SparkFlex follower, SparkFlex leader, boolean inverted) {
+    SparkFlexConfig config = new SparkFlexConfig();
     config.idleMode(IdleMode.kCoast);
     config.smartCurrentLimit(60);
 

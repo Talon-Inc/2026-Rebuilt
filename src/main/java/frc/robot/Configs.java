@@ -4,22 +4,11 @@
 
 package frc.robot;
 
-import static frc.robot.Constants.*;
-
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 /** Add your docs here. */
 public final class Configs {
-  public static final class Algae {
-    public static final SparkMaxConfig algaeConfig = new SparkMaxConfig();
-
-    static {
-      // Configure basic settings of the algae motor
-      algaeConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
-    }
-  }
-
   public static final class Climber {
     public static final SparkMaxConfig climberConfig = new SparkMaxConfig();
 
@@ -34,17 +23,17 @@ public final class Configs {
 
     static {
       // Configure basic settings of the intake motor
-      IntakeConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
+      IntakeConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(30).voltageCompensation(12);
     }
   }
 
   public static final class Shooter {
-    public static final SparkMaxConfig leftShooter = new SparkMaxConfig();
-    public static final SparkMaxConfig rightShooter = new SparkMaxConfig();
+    public static final SparkMaxConfig topShooter = new SparkMaxConfig();
+    public static final SparkMaxConfig bottomShooter = new SparkMaxConfig();
 
     static {
       // Configure basic settings of the left shooter motor
-      leftShooter
+      topShooter
           .idleMode(IdleMode.kBrake)
           .smartCurrentLimit(50)
           .voltageCompensation(12)
@@ -54,7 +43,7 @@ public final class Configs {
        * Configure the closed loop controller. We want to make sure we set the
        * feedback sensor as the primary encoder.
        */
-      // leftShooter
+      // topShooter
       //     .closedLoop
       //     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       //     // Set PID values for position control
@@ -69,7 +58,7 @@ public final class Configs {
       //     .allowedClosedLoopError(0.5);
 
       // Configure basic settings of the right shooter motor; invert the follower
-      // rightShooter
+      // bottomShooter
       //     .idleMode(IdleMode.kBrake)
       //     .smartCurrentLimit(50)
       //     .voltageCompensation(12)
@@ -79,7 +68,7 @@ public final class Configs {
        * Configure the closed loop controller. We want to make sure we set the
        * feedback sensor as the primary encoder.
        */
-      // rightShooter
+      // bottomShooter
       //     .closedLoop
       //     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       //     // Set PID values for position control
