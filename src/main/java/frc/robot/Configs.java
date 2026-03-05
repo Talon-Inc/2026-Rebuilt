@@ -8,7 +8,6 @@ import static frc.robot.Constants.*;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-import frc.robot.Constants.DriveConstants;
 
 /** Add your docs here. */
 public final class Configs {
@@ -30,33 +29,12 @@ public final class Configs {
     }
   }
 
-  public static final class Drive {
-    public static final SparkMaxConfig frontLeftConfig = new SparkMaxConfig();
-    public static final SparkMaxConfig rearLeftConfig = new SparkMaxConfig();
-    public static final SparkMaxConfig frontRightConfig = new SparkMaxConfig();
-    public static final SparkMaxConfig rearRightConfig = new SparkMaxConfig();
+  public static final class Intake {
+    public static final SparkMaxConfig IntakeConfig = new SparkMaxConfig();
 
     static {
-      // Configure basic settings of the drive motors
-      frontLeftConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
-
-      rearLeftConfig
-          .idleMode(IdleMode.kBrake)
-          .smartCurrentLimit(50)
-          .voltageCompensation(12)
-          .follow(DriveConstants.kFrontLeftDriveCanId);
-
-      frontRightConfig
-          .idleMode(IdleMode.kBrake)
-          .smartCurrentLimit(50)
-          .voltageCompensation(12)
-          .inverted(true);
-
-      rearRightConfig
-          .idleMode(IdleMode.kBrake)
-          .smartCurrentLimit(50)
-          .voltageCompensation(12)
-          .follow(DriveConstants.kFrontRightDriveCanId);
+      // Configure basic settings of the intake motor
+      IntakeConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(40).voltageCompensation(12);
     }
   }
 
@@ -95,7 +73,7 @@ public final class Configs {
           .idleMode(IdleMode.kBrake)
           .smartCurrentLimit(50)
           .voltageCompensation(12)
-          .follow(ShooterConstants.kLeftShooterCanId, true);
+          .follow(Constants.ShooterConstants.leftShooterCanId, true);
 
       /*
        * Configure the closed loop controller. We want to make sure we set the
@@ -114,17 +92,7 @@ public final class Configs {
       //     .maxVelocity(4200)
       //     .maxAcceleration(6000)
       //     .allowedClosedLoopError(0.5);
-    }
-      public static final class Intake {
-    public static final SparkMaxConfig IntakeConfig = new SparkMaxConfig();
-
-    static {
-      // Configure basic settings of the intake motor
-      IntakeConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(50).voltageCompensation(12);
-    }
-  }
-
- 
+    } 
   }
 }
   

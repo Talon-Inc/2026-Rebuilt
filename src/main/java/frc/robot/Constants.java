@@ -7,9 +7,6 @@
 
 package frc.robot;
 
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -35,6 +32,14 @@ public final class Constants {
 
   public static final class DriveConstants {
     public static final double kMaxSpeedMetersPerSecond = 4.8;
+  }
+
+  public static final class IntakeConstants {
+    //Intake motor confugurations 
+    public static final int kIntakeCanId = 11;
+    public static final int kMiddleIntakeCanId = 12;
+    public static final int kCurrentLimit = 40;
+    public static int kSensorAnalogPort;
   }
 
   public static final class ShooterConstants {
@@ -75,16 +80,5 @@ public final class Constants {
 
     public static final double kHoodMaxVel = Units.degreesToRadians(120);
     public static final double kHoodMaxAccel = Units.degreesToRadians(240);
-  }
-   public static final class IntakeConstants {
-    //Intake motor confugurations 
-      public static final int kIntakeCanId = 11;
-    public static final int kMiddleIntakeCanId = 12;
-    public static final IdleMode kIntakeIdleMode = IdleMode.kBrake;
-    public static final int kCurrentLimit = 40;
-    public static MotorType kMotorType;
-    public static int kSensorAnalogPort;
-    
-
   }
 }

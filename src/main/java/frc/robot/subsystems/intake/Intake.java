@@ -1,0 +1,28 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.subsystems.intake;
+
+import com.revrobotics.AnalogInput;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.IntakeConstants;
+
+public class Intake extends SubsystemBase {
+  private final SparkMax m_intakeMotor1 = new SparkMax(IntakeConstants.kIntakeCanId, MotorType.kBrushless);
+  private final SparkMax m_intakeMotor2 = new SparkMax(IntakeConstants.kMiddleIntakeCanId, MotorType.kBrushless);
+  private final AnalogInput m_intakeSensor = new AnalogInput(IntakeConstants.kSensorAnalogPort);
+
+  /** Creates a new Intake. */
+  public Intake() {
+    
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+  }
+}
