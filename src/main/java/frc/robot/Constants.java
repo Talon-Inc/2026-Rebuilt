@@ -40,6 +40,7 @@ public final class Constants {
     public static final int kMiddleIntakeCanId = 12;
     public static final int kCurrentLimit = 40;
     public static int kSensorAnalogPort;
+    public static int kSpeed;
   }
 
   public static final class ShooterConstants {
