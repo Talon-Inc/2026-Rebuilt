@@ -4,7 +4,7 @@
 
 package frc.robot.subsystems.intake;
 
-import com.revrobotics.AnalogInput;
+
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -14,7 +14,6 @@ import frc.robot.Constants.IntakeConstants;
 public class Intake extends SubsystemBase {
   private final SparkMax m_intakeMotor1 = new SparkMax(IntakeConstants.kIntakeCanId, MotorType.kBrushless);
   private final SparkMax m_intakeMotor2 = new SparkMax(IntakeConstants.kMiddleIntakeCanId, MotorType.kBrushless);
-  private final AnalogInput m_intakeSensor = new AnalogInput(IntakeConstants.kSensorAnalogPort);
 
   /** Creates a new Intake. */
   public Intake() {
