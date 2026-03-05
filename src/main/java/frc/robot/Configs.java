@@ -69,11 +69,11 @@ public final class Configs {
       //     .allowedClosedLoopError(0.5);
 
       // Configure basic settings of the right shooter motor; invert the follower
-      rightShooter
-          .idleMode(IdleMode.kBrake)
-          .smartCurrentLimit(50)
-          .voltageCompensation(12)
-          .follow(Constants.ShooterConstants.leftShooterCanId, true);
+      // rightShooter
+      //     .idleMode(IdleMode.kBrake)
+      //     .smartCurrentLimit(50)
+      //     .voltageCompensation(12)
+      //     .follow((int) Constants.ShooterConstants.leftShooterCanId, true);
 
       /*
        * Configure the closed loop controller. We want to make sure we set the
