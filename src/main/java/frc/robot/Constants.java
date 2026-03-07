@@ -36,11 +36,9 @@ public final class Constants {
 
   public static final class IntakeConstants {
     //Intake motor confugurations 
-    public static final int kIntakeCanId = 11;
-    public static final int kMiddleIntakeCanId = 12;
-    public static final int kCurrentLimit = 40;
+    public static final int kDeployMotorId = 11;
+    public static final int kIntakeMotorId = 12;
     public static int kSensorAnalogPort;
-    public static int kSpeed;
   }
 
   public static final class ShooterConstants {
