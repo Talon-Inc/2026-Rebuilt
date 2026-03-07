@@ -19,20 +19,40 @@ public final class Configs {
   }
 
   public static final class Intake {
-    public static final SparkMaxConfig IntakeConfig = new SparkMaxConfig();
+    public static final SparkMaxConfig deployConfig = new SparkMaxConfig();
+    public static final SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
     static {
+      // Configure basic settings of the deploy motor
+      deployConfig
+          .idleMode(IdleMode.kBrake)
+          .smartCurrentLimit(50)
+          .voltageCompensation(12)
+          .inverted(false);
+
       // Configure basic settings of the intake motor
-      IntakeConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(30).voltageCompensation(12);
+      intakeConfig
+          .idleMode(IdleMode.kCoast)
+          .smartCurrentLimit(30)
+          .voltageCompensation(12)
+          .inverted(false);
     }
   }
 
   public static final class Shooter {
+    public static final SparkMaxConfig feederMotor = new SparkMaxConfig();
     public static final SparkMaxConfig topShooter = new SparkMaxConfig();
     public static final SparkMaxConfig bottomShooter = new SparkMaxConfig();
 
     static {
-      // Configure basic settings of the left shooter motor
+      // Configure basic settings of the feeder motor
+      feederMotor
+          .idleMode(IdleMode.kCoast)
+          .smartCurrentLimit(50)
+          .voltageCompensation(12)
+          .inverted(false);
+
+      // Configure basic settings of the top shooter motor
       topShooter
           .idleMode(IdleMode.kBrake)
           .smartCurrentLimit(50)
