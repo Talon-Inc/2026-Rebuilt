@@ -6,52 +6,41 @@ package frc.robot.subsystems.intake;
 
 
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
-  private final SparkMax m_intakeMotor1 = new SparkMax(IntakeConstants.kIntakeCanId, MotorType.kBrushless);
-  private final SparkMax m_intakeMotor2 = new SparkMax(IntakeConstants.kMiddleIntakeCanId, MotorType.kBrushless);
+  private final SparkMax deployMotor;
+  private final SparkMax intakeMotor;
 
   /** Creates a new Intake. */
-   public Intake() {
-  
-   
+  public Intake() {
+    deployMotor = new SparkMax(IntakeConstants.kDeployMotorId, MotorType.kBrushless);
+    intakeMotor = new SparkMax(IntakeConstants.kIntakeMotorId, MotorType.kBrushless);
   }
 
-  public void intakefuel() {
-    m_intakeMotor1.set(IntakeConstants.kSpeed);
-   
+  // used to lower and raise intake
+  public void deploy(double speed) {
+    deployMotor.set(speed);
   }
 
-  
-
-  public void outtakeNote() {
-    m_intakeMotor1.set(-IntakeConstants.kSpeed);
-  
+  public void runIntake(double speed) {
+    intakeMotor.set(speed);
   }
 
   public void stop() {
-    m_intakeMotor1.stopMotor(); 
-    m_intakeMotor2.stopMotor();
+    deployMotor.stopMotor();
+    intakeMotor.stopMotor();
   }
 
-  
   public boolean isIntakeRunning() {
-   
-    return Math.abs(m_intakeMotor1.getEncoder().getVelocity()) > 0.1;
+    return Math.abs(deployMotor.getEncoder().getVelocity()) > 0.1;
   }
 
   @Override
-  public void periodic() {
-    
-    
-  }
+  public void periodic() {}
 }
 
 
