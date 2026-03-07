@@ -107,11 +107,11 @@ public class Shooter extends SubsystemBase {
 
   // Core Bang-Bang Logic
   private void runFlywheel(
-      BangBangController controller,
-      double currentRPM,
-      double target,
-      boolean isPrimary,
-      double voltageToUse) {
+    BangBangController controller,
+    double currentRPM,
+    double target,
+    boolean isPrimary,
+    double voltageToUse) {
     // Only run if we actualy have a target (aooids jitter at 0 RPM)
     if (target > 50.0) {
       // .calculate() returns 1.0 if we need speed, 0.0 if we don't
