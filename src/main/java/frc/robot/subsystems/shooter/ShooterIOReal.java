@@ -12,6 +12,8 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import frc.robot.Configs.ShooterConfigs;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterIOReal implements ShooterIO {
@@ -19,13 +21,8 @@ public class ShooterIOReal implements ShooterIO {
   private final SparkFlex primaryLeader;
   private final SparkFlex primaryFollower;
 
-  // Secondary Set (Optional)
-  private final SparkFlex secondaryLeader;
-  private final SparkFlex secondaryFollower;
-
-  // Hoods
-  private final SparkMax primaryHood;
-  private final SparkMax secondaryHood;
+  // kicker set
+  private final SparkMax kicker;
 
   public ShooterIOReal() {
     // --- 1. Primary Flywheel Setup ---
@@ -38,32 +35,8 @@ public class ShooterIOReal implements ShooterIO {
     // Configure Follower (Follows Leader, Inverted = true usually for shooters on opposite sides)
     configureFollower(primaryFollower, primaryLeader, true);
 
-    // --- 2. Secondary Flywheel Setup ---
-    if (ShooterConstants.kIsDoubleFlywheel) {
-      secondaryLeader = new SparkFlex(ShooterConstants.kSecondaryLeaderID, MotorType.kBrushless);
-      secondaryFollower = new SparkFlex(ShooterConstants.kSecondaryFollowerID, MotorType.kBrushless);
-
-      configureLeader(secondaryLeader);
-      configureFollower(secondaryFollower, secondaryLeader, true);
-    } else {
-      secondaryLeader = null;
-      secondaryFollower = null;
-    }
-
-    // --- 3. Hood Setup ---
-    if (ShooterConstants.kHasHood) {
-      primaryHood = new SparkMax(ShooterConstants.kPrimaryHoodID, MotorType.kBrushless);
-      configureHood(primaryHood);
-    } else {
-      primaryHood = null;
-    }
-
-    if (ShooterConstants.kHasHood && ShooterConstants.kHasDualHoods) {
-      secondaryHood = new SparkMax(ShooterConstants.kSecondaryHoodID, MotorType.kBrushless);
-      configureHood(secondaryHood);
-    } else {
-      secondaryHood = null;
-    }
+    // --- 3. Kicker Setup ---
+    kicker = new SparkMax(ShooterConstants.kKickerId, MotorType.kBrushless);
   }
 
   private void configureLeader(SparkFlex motor) {
@@ -86,27 +59,13 @@ public class ShooterIOReal implements ShooterIO {
     follower.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  // Configure Hood (Brake, PID conversions)
-  private void configureHood(SparkMax motor) {
-    SparkMaxConfig config = new SparkMaxConfig();
-
-    // Hoods must Brake to hold angle
-    config.idleMode(IdleMode.kBrake);
-    config.smartCurrentLimit(20);
-
-    // Convert Motor Rotations -> Hood Radians
-    double posFactor = (1.0 / ShooterConstants.kHoodGearRatio) * 2.0 * Math.PI;
-    config.encoder.positionConversionFactor(posFactor);
-    config.encoder.velocityConversionFactor(posFactor / 60);
-
-    motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-  }
-
   // -- LOGIC --
 
+  // Update Inputs functions as a way to update the Values in the Logging framework from the REAL sensor values
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
     // Primary Flywheel
+    // inputs.[value name] sets the value for the variables you created in ShooterIO
     inputs.primaryLeaderRPM = primaryLeader.getEncoder().getVelocity();
     inputs.primaryLeaderVolts = primaryLeader.getAppliedOutput() * primaryFollower.getBusVoltage();
     inputs.primaryLeaderAmps = new double[] {primaryFollower.getOutputCurrent()};
@@ -114,31 +73,7 @@ public class ShooterIOReal implements ShooterIO {
     inputs.primaryFollowerVolts =
         primaryFollower.getAppliedOutput() * primaryFollower.getBusVoltage();
     inputs.primaryFollowerAmps = new double[] {primaryFollower.getOutputCurrent()};
-
-    // Secondary Flywheel
-    if (secondaryLeader != null) {
-      inputs.secondaryLeaderRPM = secondaryLeader.getEncoder().getVelocity();
-      inputs.secondaryLeaderVolts =
-          secondaryLeader.getAppliedOutput() * secondaryLeader.getBusVoltage();
-      inputs.secondaryLeaderAmps = new double[] {secondaryFollower.getOutputCurrent()};
-
-      inputs.secondaryFollowerVolts =
-          secondaryFollower.getAppliedOutput() * secondaryFollower.getBusVoltage();
-      inputs.secondaryFollowerAmps = new double[] {secondaryFollower.getOutputCurrent()};
-    }
-
-    // Primary Hood
-    if (primaryHood != null) {
-      inputs.primaryHoodRad = primaryHood.getEncoder().getPosition();
-      inputs.primaryHoodVolts = primaryHood.getAppliedOutput() * primaryHood.getBusVoltage();
-      inputs.hoodsConnected = true;
-    }
-
-    // Secondary Hood
-    if (secondaryHood != null) {
-      inputs.secondaryHoodRad = secondaryHood.getEncoder().getPosition();
-      inputs.secondaryHoodVolts = secondaryHood.getAppliedOutput() * secondaryHood.getBusVoltage();
-    }
+  
   }
 
   @Override
@@ -147,17 +82,7 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setSecondaryVolts(double volts) {
-    if (secondaryLeader != null) secondaryLeader.setVoltage(volts);
-  }
-
-  @Override
-  public void setPrimaryHoodVolts(double volts) {
-    if (primaryHood != null) primaryHood.setVoltage(volts);
-  }
-
-  @Override
-  public void setSecondaryHoodVolts(double volts) {
-    if (secondaryHood != null) secondaryHood.setVoltage(volts);
+  public void setKickerVolts(double volts) {
+    kicker.setVoltage(volts);
   }
 }
