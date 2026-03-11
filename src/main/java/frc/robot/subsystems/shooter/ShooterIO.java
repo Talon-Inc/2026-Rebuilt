@@ -35,6 +35,13 @@ public interface ShooterIO {
     public double secondaryHoodVolts = 0.0;
 
     public boolean hoodsConnected = false;
+
+    // --- kicker ---
+    public double kickerAmps = 0.0;
+    public double kickerVolts = 0.0;
+    public double kickerRPM = 0.0;
+
+    public boolean kickerConnected = false;
   }
 
   // Updates the set of loggable inputs
@@ -43,12 +50,8 @@ public interface ShooterIO {
   // Run the shooters (Volts)
   public default void setPrimaryVolts(double volts) {}
 
-  public default void setSecondaryVolts(double volts) {}
-
-  // Run the Adjustable Hoods (Volts)
-  public default void setPrimaryHoodVolts(double volts) {}
-
-  public default void setSecondaryHoodVolts(double volts) {}
+  // Run the kicker (Volts)
+  public default void setKickerVolts(double volts) {}
 
   // Configure PID Constants (Optional If tuning Via Advantage Scope)
   public default void configurePID(double kP, double kI, double kD) {}

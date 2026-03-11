@@ -24,6 +24,7 @@ public class Shooter extends SubsystemBase {
   // Setpoints
   private double targetPrimaryRPM = 0.0;
   private double targetSecondaryPRM = 0.0;
+  private double targetKickerRPM = 0.0;
 
   // Hood controllers (Profiled PID)
   private final ProfiledPIDController primaryHoodController;
@@ -53,19 +54,6 @@ public class Shooter extends SubsystemBase {
     // Initialize Bang-Bang Controllers
     primaryBang = new BangBangController(ShooterConstants.kFlywheelToleranceRPM);
     secondaryBang = new BangBangController(ShooterConstants.kFlywheelToleranceRPM);
-
-    // Initialize Hood Controllers
-    primaryHoodController = createHoodController();
-    secondaryHoodController = createHoodController();
-  }
-
-  private ProfiledPIDController createHoodController() {
-    return new ProfiledPIDController(
-        ShooterConstants.kHoodkP,
-        0.0,
-        0.0,
-        new TrapezoidProfile.Constraints(
-            ShooterConstants.kHoodMaxVel, ShooterConstants.kHoodMaxAccel));
   }
 
   @Override
@@ -85,24 +73,9 @@ public class Shooter extends SubsystemBase {
     // Run Flywheel Logic
     runFlywheel(primaryBang, inputs.primaryLeaderRPM, targetPrimaryRPM, true, flyVolts.get());
 
-    if (ShooterConstants.kIsDoubleFlywheel) {
-      runFlywheel(
-          secondaryBang, inputs.secondaryLeaderRPM, targetSecondaryPRM, false, flyVolts.get());
-    }
-
-    // Run Hood Logic
-    if (ShooterConstants.kHasHood) {
-      runHood(primaryHoodController, inputs.primaryHoodRad, targetPrimaryHoodAngle, true);
-    }
-
-    if (ShooterConstants.kHasHood && ShooterConstants.kHasDualHoods) {
-      runHood(secondaryHoodController, inputs.secondaryHoodRad, targetSecondaryHoodAngle, false);
-    }
-
     // Log Goals
     Logger.recordOutput("Shooter/Goal/PrimaryRPM", targetPrimaryRPM);
-    Logger.recordOutput("Shooter/Goal/SecondaryRPM", targetSecondaryPRM);
-    Logger.recordOutput("Shooter/Goal/PrimaryHood", targetPrimaryHoodAngle);
+    Logger.recordOutput("Shooter/Goal/KickerRPM", targetKickerRPM);
   }
 
   // Core Bang-Bang Logic
@@ -120,32 +93,11 @@ public class Shooter extends SubsystemBase {
       // Multiply by Max Voltage (12V)
       double volts = demand * voltageToUse;
 
-      if (isPrimary) io.setPrimaryVolts(volts);
-      else io.setSecondaryVolts(volts);
+      io.setPrimaryVolts(volts);
     } else {
       // Idle Mode
-      if (isPrimary) io.setPrimaryVolts(0.0);
-      else io.setSecondaryVolts(0.0);
+      io.setPrimaryVolts(0.0);
     }
-  }
-
-  // Core Hood Logic
-  private void runHood(
-      ProfiledPIDController controller, double currentRad, double targetrad, boolean isPrimary) {
-    // Safety Clamp: This ensures we never command past physical limits
-    double clampedGoal =
-        Math.max(
-            ShooterConstants.kHoodMinAngleRad,
-            Math.min(ShooterConstants.kHoodMaxAngleRad, targetrad));
-
-    double volts = controller.calculate(currentRad, clampedGoal);
-
-    if (isPrimary) io.setPrimaryHoodVolts(volts);
-    else io.setSecondaryHoodVolts(volts);
-
-    // Log Setpoints
-    String prefix = isPrimary ? "Shooter/PrimaryHood" : "Shooter/SecondaryHood";
-    Logger.recordOutput(prefix + "/Setpoint", controller.getSetpoint().position);
   }
 
   // --- Commands ---
@@ -191,5 +143,10 @@ public class Shooter extends SubsystemBase {
     }
 
     return primaryReady;
+  }
+
+  // kicker (wheels that feed into the shooter)
+  public void kicker() {
+    
   }
 }
