@@ -26,12 +26,16 @@ public class Intake extends SubsystemBase {
     deployMotor.set(speed);
   }
 
+  // used to run the intake rollers
   public void runIntake(double speed) {
     intakeMotor.set(speed);
   }
 
-  public void stop() {
+  public void stopDeploy() {
     deployMotor.stopMotor();
+  }
+
+  public void stopIntake() {
     intakeMotor.stopMotor();
   }
 
