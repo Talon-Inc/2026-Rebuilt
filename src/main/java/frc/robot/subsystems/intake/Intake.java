@@ -7,6 +7,8 @@ package frc.robot.subsystems.intake;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
@@ -14,11 +16,13 @@ import frc.robot.Constants.IntakeConstants;
 public class Intake extends SubsystemBase {
   private final SparkMax deployMotor;
   private final SparkMax intakeMotor;
+  private final AbsoluteEncoder encoder;
 
   /** Creates a new Intake. */
   public Intake() {
     deployMotor = new SparkMax(IntakeConstants.kDeployMotorId, MotorType.kBrushless);
     intakeMotor = new SparkMax(IntakeConstants.kIntakeMotorId, MotorType.kBrushless);
+    encoder = deployMotor.getAbsoluteEncoder();
   }
 
   // used to lower and raise intake
@@ -44,7 +48,10 @@ public class Intake extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    if (encoder.getPosition() < 0 || encoder.getPosition() > 0.25)
+      stopDeploy();
+  }
 }
 
 
