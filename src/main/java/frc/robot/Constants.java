@@ -50,6 +50,9 @@ public final class Constants {
     public static final boolean kHasDualHoods = true;
 
     // --- Device IDs ---
+    // Kicker
+    public static final int kKickerId = 13;
+
     // Primary Flywheel (e.g. Bottom Roller) - 2 Motors
     public static final int kPrimaryLeaderID = 20;
     public static final int kPrimaryFollowerID = 21;

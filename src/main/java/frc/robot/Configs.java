@@ -9,7 +9,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 /** Add your docs here. */
 public final class Configs {
-  public static final class Climber {
+  public static final class ClimberConfigs {
     public static final SparkMaxConfig climberConfig = new SparkMaxConfig();
 
     static {
@@ -18,7 +18,7 @@ public final class Configs {
     }
   }
 
-  public static final class Intake {
+  public static final class IntakeConfigs {
     public static final SparkMaxConfig deployConfig = new SparkMaxConfig();
     public static final SparkMaxConfig intakeConfig = new SparkMaxConfig();
 
@@ -39,7 +39,7 @@ public final class Configs {
     }
   }
 
-  public static final class Shooter {
+  public static final class ShooterConfigs {
     public static final SparkMaxConfig feederMotor = new SparkMaxConfig();
     public static final SparkMaxConfig topShooter = new SparkMaxConfig();
     public static final SparkMaxConfig bottomShooter = new SparkMaxConfig();
