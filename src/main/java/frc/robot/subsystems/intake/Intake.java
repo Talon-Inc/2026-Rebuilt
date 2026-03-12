@@ -30,6 +30,7 @@ public class Intake extends SubsystemBase {
   }
 
   // used to lower and raise intake
+  // "+" lowers and "-" raises
   public void deploy(double speed) {
     deployMotor.set(speed);
   }
@@ -47,14 +48,18 @@ public class Intake extends SubsystemBase {
     intakeMotor.stopMotor();
   }
 
+  public double getPosition(){
+    return encoder.getPosition();
+  }
+
   public boolean isIntakeRunning() {
     return Math.abs(deployMotor.getEncoder().getVelocity()) > 0.1;
   }
 
   @Override
   public void periodic() {
-    double currentPos = encoder.getPosition();
-    if (currentPos < 0 || currentPos > 0.25)
+    double currentPos = encoder.getPosition(); // in degrees
+    if (currentPos < 0 || currentPos > 90)
       stopDeploy();
   }
 }

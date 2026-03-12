@@ -25,18 +25,18 @@ public final class Configs {
 
     static {
       // Configure basic settings of the deploy motor
+      // and its absolute encoder
       deployConfig
           .idleMode(IdleMode.kBrake)
           .smartCurrentLimit(50)
           .voltageCompensation(12)
           .inverted(false);
-      // configs for absolute encoder 
-
-      deployConfig.absoluteEncoder
-        .setSparkMaxDataPortConfig() // Tells Spark Max to use the data port
-        .inverted(false)             
-        .positionConversionFactor(1.0) 
-        .zeroOffset(0.0);           
+      deployConfig
+          .absoluteEncoder
+          .setSparkMaxDataPortConfig() // Tells Spark Max to use the data port
+          .inverted(false)             
+          .positionConversionFactor(360) // Convert to degrees
+          .zeroOffset(0.0);           
 
       // Configure basic settings of the intake motor
       intakeConfig
@@ -113,5 +113,3 @@ public final class Configs {
     } 
   }
 }
-  
-
