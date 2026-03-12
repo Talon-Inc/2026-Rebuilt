@@ -53,7 +53,8 @@ public class Intake extends SubsystemBase {
 
   @Override
   public void periodic() {
-    if (encoder.getPosition() < 0 || encoder.getPosition() > 0.25)
+    double currentPos = encoder.getPosition();
+    if (currentPos < 0 || currentPos > 0.25)
       stopDeploy();
   }
 }
