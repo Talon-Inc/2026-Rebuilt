@@ -139,6 +139,16 @@ public class RobotContainer {
                             new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
                     drive)
                 .ignoringDisable(true));
+    
+    // controller
+    //     .y()
+    //     .toggleOnTrue(
+    //         Commands.run(
+    //             () ->
+    //                 intake.runIntake(1))
+    //         Commands.stop(
+    //             () ->
+    //                 intake.stopIntake()));
   }
 
   /**
