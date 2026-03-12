@@ -27,21 +27,9 @@ public interface ShooterIO {
     public double secondaryFollowerVolts = 0.0;
     public double[] secondaryFollowerAmps = new double[] {};
 
-    // --- Hoods ---
-    public double primaryHoodRad = 0.0;
-    public double primaryHoodVolts = 0.0;
-
-    public double secondaryHoodRad = 0.0;
-    public double secondaryHoodVolts = 0.0;
-
-    public boolean hoodsConnected = false;
-
     // --- kicker ---
     public double kickerAmps = 0.0;
     public double kickerVolts = 0.0;
-    public double kickerRPM = 0.0;
-
-    public boolean kickerConnected = false;
   }
 
   // Updates the set of loggable inputs

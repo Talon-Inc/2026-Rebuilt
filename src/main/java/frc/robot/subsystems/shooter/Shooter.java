@@ -26,23 +26,7 @@ public class Shooter extends SubsystemBase {
   private double targetSecondaryPRM = 0.0;
   private double targetKickerRPM = 0.0;
 
-  // Hood controllers (Profiled PID)
-  private final ProfiledPIDController primaryHoodController;
-  private final ProfiledPIDController secondaryHoodController;
-
-  // Setpoints
-  private double targetPrimaryHoodAngle = ShooterConstants.kHoodMinAngleRad;
-  private double targetSecondaryHoodAngle = ShooterConstants.kHoodMinAngleRad;
-
   // Tunable Numbers
-  // Hood PID
-  private final LoggedTunableNumber hoodKp =
-      new LoggedTunableNumber("Tuning/Shooter/Hood/kP", ShooterConstants.kHoodkP);
-  private final LoggedTunableNumber hoodKi =
-      new LoggedTunableNumber("Tuning/Shooter/Hood/kI", ShooterConstants.kHoodkI);
-  private final LoggedTunableNumber hoodKd =
-      new LoggedTunableNumber("Tuning/Shooter/Hood/kD", ShooterConstants.kHoodkD);
-
   // Flywheel Power (Bang-Bang Voltage)
   private final LoggedTunableNumber flyVolts =
       new LoggedTunableNumber("Tuning/Shooter/FlywheelVolts", ShooterConstants.kBangBangVoltage);
@@ -64,12 +48,6 @@ public class Shooter extends SubsystemBase {
     Logger.processInputs("Shooter", inputs);
 
     // Update Tunables (This is for Live Tuning should make tuning faster)
-    // Check if PID values changed on the dashboard
-    if (hoodKp.hasChanged() || hoodKi.hasChanged() || hoodKd.hasChanged()) {
-      primaryHoodController.setPID(hoodKp.get(), hoodKi.get(), hoodKd.get());
-      secondaryHoodController.setPID(hoodKp.get(), hoodKi.get(), hoodKd.get());
-    }
-
     // Run Flywheel Logic
     runFlywheel(primaryBang, inputs.primaryLeaderRPM, targetPrimaryRPM, true, flyVolts.get());
 
@@ -118,15 +96,6 @@ public class Shooter extends SubsystemBase {
     this.targetSecondaryPRM = secondaryRPM;
   }
 
-  // Sets the hood angle
-  // If Dual hoods are enabled, this sets BOTH to the same angle
-  public void setHoodAngle(double radians) {
-    this.targetPrimaryHoodAngle = radians;
-    if (ShooterConstants.kHasDualHoods) {
-      this.targetSecondaryHoodAngle = radians;
-    }
-  }
-
   /**
    * @return True if flywheels are within tolerance of target
    */
@@ -146,7 +115,7 @@ public class Shooter extends SubsystemBase {
   }
 
   // kicker (wheels that feed into the shooter)
-  public void kicker() {
-    
+  public void setKickerSpeed(double speed) {
+    io.setKickerVolts(speed * 12);
   }
 }
