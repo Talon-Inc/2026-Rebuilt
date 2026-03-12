@@ -59,8 +59,9 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     double currentPos = encoder.getPosition(); // in degrees
-    if (currentPos < 0 || currentPos > 90)
+    if (currentPos < 0 || currentPos > 90) {
       stopDeploy();
+    }
   }
 }
 
