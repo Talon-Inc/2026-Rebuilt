@@ -81,7 +81,7 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setKickerVolts(double volts) {
-    kicker.setVoltage(volts);
+  public void setKickerSpeed(double speed) {
+    kicker.set(speed);
   }
 }

@@ -116,6 +116,6 @@ public class Shooter extends SubsystemBase {
 
   // kicker (wheels that feed into the shooter)
   public void setKickerSpeed(double speed) {
-    io.setKickerVolts(speed * 12);
+    io.setKickerSpeed(speed);
   }
 }
