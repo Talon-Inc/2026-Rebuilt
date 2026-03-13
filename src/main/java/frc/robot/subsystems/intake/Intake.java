@@ -18,8 +18,8 @@ public class Intake extends SubsystemBase {
   private final SparkMax deployMotor;
   private final SparkMax intakeMotor;
   private final AbsoluteEncoder encoder;
-  private final double lowerLimit;
-  private final double upperLimit;
+  private double lowerLimit;
+  private double upperLimit;
 
   /** Creates a new Intake. */
   public Intake() {
@@ -61,8 +61,13 @@ public class Intake extends SubsystemBase {
     return Math.abs(deployMotor.getEncoder().getVelocity()) > 0.1;
   }
 
-  
+  public void setLowerLimit(double limit){
+    this.lowerLimit = limit;
+  }
 
+  public void setUpperLimit(double limit){
+    this.upperLimit = limit;
+  }
   @Override
   public void periodic() {
     double currentPos = encoder.getPosition(); // in degrees
