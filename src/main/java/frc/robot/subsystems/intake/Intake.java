@@ -10,6 +10,7 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs.IntakeConfigs;
 import frc.robot.Constants.IntakeConstants;
@@ -40,7 +41,12 @@ public class Intake extends SubsystemBase {
     deployMotor.set(speed);
   }
 
+  public Command deployCommand(double speed) {
+    return runOnce(() -> deploy(speed));
+  }
+
   // used to run the intake rollers
+  // "+" pulls balls in and "-" pushes them out
   public void runIntake(double speed) {
     intakeMotor.set(speed);
   }
@@ -53,7 +59,7 @@ public class Intake extends SubsystemBase {
     intakeMotor.stopMotor();
   }
 
-  public double getPosition(){
+  public double getPosition() {
     return encoder.getPosition();
   }
 
@@ -61,13 +67,14 @@ public class Intake extends SubsystemBase {
     return Math.abs(deployMotor.getEncoder().getVelocity()) > 0.1;
   }
 
-  public void setLowerLimit(double limit){
+  public void setLowerLimit(double limit) {
     this.lowerLimit = limit;
   }
 
-  public void setUpperLimit(double limit){
+  public void setUpperLimit(double limit) {
     this.upperLimit = limit;
   }
+
   @Override
   public void periodic() {
     double currentPos = encoder.getPosition(); // in degrees
@@ -76,7 +83,3 @@ public class Intake extends SubsystemBase {
     }
   }
 }
-
-
-  
-
