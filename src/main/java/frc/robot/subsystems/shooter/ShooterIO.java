@@ -39,7 +39,7 @@ public interface ShooterIO {
   public default void setPrimaryVolts(double volts) {}
 
   // Run the kicker (Volts)
-  public default void setKickerVolts(double volts) {}
+  public default void setKickerSpeed(double speed) {}
 
   // Configure PID Constants (Optional If tuning Via Advantage Scope)
   public default void configurePID(double kP, double kI, double kD) {}
