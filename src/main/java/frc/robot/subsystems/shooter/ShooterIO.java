@@ -9,6 +9,10 @@ import org.littletonrobotics.junction.AutoLog;
 public interface ShooterIO {
   @AutoLog
   public static class ShooterIOInputs {
+    // --- Kicker ---
+    public double kickerVolts = 0.0;
+    public double[] kickerAmps = new double[] {};
+
     // --- Primary Set (Bottom) ---
     public double primaryLeaderRPM = 0.0;
     public double primaryLeaderVolts = 0.0;
@@ -26,20 +30,17 @@ public interface ShooterIO {
     // Secondary Follower Data
     public double secondaryFollowerVolts = 0.0;
     public double[] secondaryFollowerAmps = new double[] {};
-
-    // --- kicker ---
-    public double kickerAmps = 0.0;
-    public double kickerVolts = 0.0;
   }
 
   // Updates the set of loggable inputs
   public default void updateInputs(ShooterIOInputs inputs) {}
 
-  // Run the shooters (Volts)
-  public default void setPrimaryVolts(double volts) {}
-
   // Run the kicker (Volts)
   public default void setKickerSpeed(double speed) {}
+
+  // Run the shooters (Volts)
+  public default void setPrimaryVolts(double volts) {}
+  public default void setSecondaryVolts(double volts) {}
 
   // Configure PID Constants (Optional If tuning Via Advantage Scope)
   public default void configurePID(double kP, double kI, double kD) {}

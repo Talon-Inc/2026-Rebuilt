@@ -9,53 +9,53 @@ import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkFlexConfig;
 
 import frc.robot.Configs.ShooterConfigs;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterIOReal implements ShooterIO {
+  // Kicker motor
+  private final SparkMax kicker;
+  
   // Primary Set
   private final SparkFlex primaryLeader;
   private final SparkFlex primaryFollower;
 
-  // kicker set
-  private final SparkMax kicker;
+  // Secondary Set (Optional)
+  private final SparkFlex secondaryLeader;
+  private final SparkFlex secondaryFollower;
 
   public ShooterIOReal() {
-    // --- 1. Primary Flywheel Setup ---
-    primaryLeader = new SparkFlex(ShooterConstants.kPrimaryLeaderID, MotorType.kBrushless);
-    primaryFollower = new SparkFlex(ShooterConstants.kPrimaryFollowerID, MotorType.kBrushless);
+    // --- 1. Kicker Setup ---
+    kicker = new SparkMax(ShooterConstants.kKickerId, MotorType.kBrushless);
+
+    // Configure Kicker/Feeder
+    kicker.configure(ShooterConfigs.kickerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    // --- 2. Primary Flywheel Setup ---
+    primaryLeader = new SparkFlex(ShooterConstants.kPrimaryLeaderId, MotorType.kBrushless);
+    primaryFollower = new SparkFlex(ShooterConstants.kPrimaryFollowerId, MotorType.kBrushless);
 
     // Configure Leader
-    configureLeader(primaryLeader);
+    primaryLeader.configure(ShooterConfigs.leaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    // Configure Follower (Follows Leader, Inverted = true usually for shooters on opposite sides)
-    configureFollower(primaryFollower, primaryLeader, true);
+    // Configure Follower (Follows Leader)
+    ShooterConfigs.followerConfig.follow(primaryLeader, true);
+    primaryFollower.configure(ShooterConfigs.followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    // --- 3. Kicker Setup ---
-    kicker = new SparkMax(ShooterConstants.kKickerId, MotorType.kBrushless);
-  }
+    // --- 3. Secondary Flywheel Setup ---
+    if (ShooterConstants.kIsDoubleFlywheel) {
+      secondaryLeader = new SparkFlex(ShooterConstants.kSecondaryLeaderId, MotorType.kBrushless);
+      secondaryFollower = new SparkFlex(ShooterConstants.kSecondaryFollowerId, MotorType.kBrushless);
 
-  private void configureLeader(SparkFlex motor) {
-    SparkFlexConfig config = new SparkFlexConfig();
+      secondaryLeader.configure(ShooterConfigs.leaderConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    config.idleMode(IdleMode.kCoast);
-
-    // High current limit for Bang-Bang Recovery
-    config.smartCurrentLimit(60);
-    // Apply Config
-    motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-  }
-
-  private void configureFollower(SparkFlex follower, SparkFlex leader, boolean inverted) {
-    SparkFlexConfig config = new SparkFlexConfig();
-    config.idleMode(IdleMode.kCoast);
-    config.smartCurrentLimit(60);
-
-    config.follow(leader, inverted);
-    follower.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+      ShooterConfigs.followerConfig.follow(secondaryLeader, true);
+      secondaryFollower.configure(ShooterConfigs.followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    } else {
+      secondaryLeader = null;
+      secondaryFollower = null;
+    }
   }
 
   // -- LOGIC --
@@ -72,7 +72,23 @@ public class ShooterIOReal implements ShooterIO {
     inputs.primaryFollowerVolts =
         primaryFollower.getAppliedOutput() * primaryFollower.getBusVoltage();
     inputs.primaryFollowerAmps = new double[] {primaryFollower.getOutputCurrent()};
-  
+    
+    // Secondary Flywheel
+    if (secondaryLeader != null) {
+      inputs.secondaryLeaderRPM = secondaryLeader.getEncoder().getVelocity();
+      inputs.secondaryLeaderVolts =
+          secondaryLeader.getAppliedOutput() * secondaryLeader.getBusVoltage();
+      inputs.secondaryLeaderAmps = new double[] {secondaryFollower.getOutputCurrent()};
+
+      inputs.secondaryFollowerVolts =
+          secondaryFollower.getAppliedOutput() * secondaryFollower.getBusVoltage();
+      inputs.secondaryFollowerAmps = new double[] {secondaryFollower.getOutputCurrent()};
+    }
+  }
+
+  @Override
+  public void setKickerSpeed(double speed) {
+    kicker.set(speed);
   }
 
   @Override
@@ -81,7 +97,7 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setKickerSpeed(double speed) {
-    kicker.set(speed);
+  public void setSecondaryVolts(double volts) {
+    secondaryLeader.setVoltage(volts);
   }
 }

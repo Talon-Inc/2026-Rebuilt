@@ -5,8 +5,8 @@
 package frc.robot;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 
 /** Add your docs here. */
 public final class Configs {
@@ -48,24 +48,32 @@ public final class Configs {
   }
 
   public static final class ShooterConfigs {
-    public static final SparkMaxConfig feederMotor = new SparkMaxConfig();
-    public static final SparkMaxConfig topShooter = new SparkMaxConfig();
-    public static final SparkMaxConfig bottomShooter = new SparkMaxConfig();
+    public static final SparkFlexConfig leaderConfig = new SparkFlexConfig();
+    public static final SparkFlexConfig followerConfig = new SparkFlexConfig();
+    public static final SparkMaxConfig kickerConfig = new SparkMaxConfig();
     
     static {
-      // Configure basic settings of the feeder motor
-      feederMotor
+      // Configure basic settings of the leader motor
+      leaderConfig
+          .idleMode(IdleMode.kCoast)
+          .smartCurrentLimit(60) // High current limit for Bang-Bang Recovery
+          .voltageCompensation(12)
+          .inverted(true);
+      
+      // Configure basic settings of the follower motor
+      // Added follow in ShooterIOReal
+      followerConfig
+          .idleMode(IdleMode.kCoast)
+          .smartCurrentLimit(60)
+          .voltageCompensation(12);
+          // .follow(primaryLeader, true);
+
+      // Configure basic settings of the kicker/feeder motor
+      kickerConfig
           .idleMode(IdleMode.kCoast)
           .smartCurrentLimit(50)
           .voltageCompensation(12)
           .inverted(false);
-
-      // Configure basic settings of the top shooter motor
-      topShooter
-          .idleMode(IdleMode.kBrake)
-          .smartCurrentLimit(50)
-          .voltageCompensation(12)
-          .inverted(true);
 
 
       /*
