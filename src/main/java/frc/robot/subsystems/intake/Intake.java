@@ -18,6 +18,8 @@ public class Intake extends SubsystemBase {
   private final SparkMax deployMotor;
   private final SparkMax intakeMotor;
   private final AbsoluteEncoder encoder;
+  private final double lowerLimit;
+  private final double upperLimit;
 
   /** Creates a new Intake. */
   public Intake() {
@@ -27,6 +29,9 @@ public class Intake extends SubsystemBase {
 
     deployMotor.configure(IntakeConfigs.deployConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     intakeMotor.configure(IntakeConfigs.intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    lowerLimit = 0;
+    upperLimit = 90;
   }
 
   // used to lower and raise intake
@@ -56,10 +61,12 @@ public class Intake extends SubsystemBase {
     return Math.abs(deployMotor.getEncoder().getVelocity()) > 0.1;
   }
 
+  
+
   @Override
   public void periodic() {
     double currentPos = encoder.getPosition(); // in degrees
-    if (currentPos < 0 || currentPos > 90) {
+    if (currentPos < lowerLimit || currentPos > upperLimit) {
       stopDeploy();
     }
   }
