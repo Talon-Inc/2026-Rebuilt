@@ -7,6 +7,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -64,5 +65,15 @@ public final class Constants {
     public static final double kFlywheelToleranceRPM = 50.0;
     public static final double kMaxRPM = 5700.0;
     public static final double kBangBangVoltage = 12.0;
+  }
+
+  public static final class FieldConstants {
+    public static final double fieldLength = 0.0;
+    public static final double fieldWidth = 0.0;
+
+    public static final class Goals {
+      public static final Translation2d blueGoal = new Translation2d();
+      public static final Translation2d redGoal = new Translation2d();
+    }
   }
 }
