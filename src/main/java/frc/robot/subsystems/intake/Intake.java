@@ -59,18 +59,22 @@ public class Intake extends SubsystemBase {
     intakeMotor.stopMotor();
   }
 
+  // Get angle of the deploy arm
   public double getPosition() {
     return encoder.getPosition();
   }
 
+  // Check if intake motor is running
   public boolean isIntakeRunning() {
-    return Math.abs(deployMotor.getEncoder().getVelocity()) > 0.1;
+    return Math.abs(intakeMotor.getEncoder().getVelocity()) > 0.1;
   }
 
+  // Set minimum angle for deploy
   public void setLowerLimit(double limit) {
     this.lowerLimit = limit;
   }
 
+  // Set maximum angle for deploy
   public void setUpperLimit(double limit) {
     this.upperLimit = limit;
   }

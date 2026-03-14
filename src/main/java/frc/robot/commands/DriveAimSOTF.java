@@ -48,7 +48,7 @@ public class DriveAimSOTF extends Command {
     new InterpolatingDoubleTreeMap();
 
   static {
-    // Key: meters, Value: m/s
+    // key: meters, value: m/s
     maxTranslationSpeedMap.put(null, null);
   }
 

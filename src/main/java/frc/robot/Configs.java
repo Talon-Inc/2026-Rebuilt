@@ -34,9 +34,9 @@ public final class Configs {
       deployConfig
           .absoluteEncoder
           .setSparkMaxDataPortConfig() // Tells Spark Max to use the data port
-          .inverted(false)             
+          .inverted(false)
           .positionConversionFactor(360) // Convert to degrees
-          .zeroOffset(0.0);           
+          .zeroOffset(0.0);
 
       // Configure basic settings of the intake motor
       intakeConfig

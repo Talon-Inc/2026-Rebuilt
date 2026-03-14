@@ -54,12 +54,12 @@ public final class Constants {
     public static final int kKickerId = 13;
 
     // Primary Flywheel (e.g. Bottom Roller) - 2 Motors
-    public static final int kPrimaryLeaderId = 20;
-    public static final int kPrimaryFollowerId = 21;
+    public static final int kPrimaryLeaderId = 14;
+    public static final int kPrimaryFollowerId = 15;
 
     // Secondary Flywheel (e.g. Top Roller) - 2 Motors
-    public static final int kSecondaryLeaderId = 24;
-    public static final int kSecondaryFollowerId = 25;
+    public static final int kSecondaryLeaderId = 15;
+    public static final int kSecondaryFollowerId = 16;
 
     // --- Flywheel Constants (Bang-Bang) ---
     public static final double kFlywheelToleranceRPM = 50.0;
@@ -68,12 +68,13 @@ public final class Constants {
   }
 
   public static final class FieldConstants {
-    public static final double fieldLength = 0.0;
-    public static final double fieldWidth = 0.0;
+    public static final double fieldLength = Units.inchesToMeters(651.22);
+    public static final double fieldWidth = Units.inchesToMeters(317.69);
+    public static final Translation2d hubTranslation = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
 
     public static final class Goals {
-      public static final Translation2d blueGoal = new Translation2d();
-      public static final Translation2d redGoal = new Translation2d();
+      public static final Translation2d blueHub = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
+      public static final Translation2d redHub = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
     }
   }
 }

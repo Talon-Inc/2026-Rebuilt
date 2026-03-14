@@ -7,7 +7,12 @@
 
 package frc.robot;
 
+import static frc.robot.subsystems.vision.VisionConstants.*;
+
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import com.pathplanner.lib.auto.AutoBuilder;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -16,24 +21,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.commands.Agitate;
+import frc.robot.commands.DeployIntake;
+import frc.robot.commands.DriveAimSOTF;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.IntakeFuel;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIONavX;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.intake.Intake;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOReal;
-import frc.robot.commands.DriveAimSOTF;
-import frc.robot.commands.DeployIntake;
-import frc.robot.commands.IntakeFuel;
-import frc.robot.commands.ShootCommand;
-import frc.robot.commands.Agitate;
-
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOPhotonVision;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -44,13 +45,19 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  private final Shooter shooter;
   private final Intake intake;
+  private final Shooter shooter;
+  private final Vision vision;
   private final LED led;
 
   // Commands
+  // Intake Commands
+  private final DeployIntake deployIntake;
+  private final IntakeFuel intakeFuel;
+  private final Agitate agitate;
+
   // Shooter Commands
-  private final DriveAimSOTF shootOnFly
+  private final DriveAimSOTF shootOnFly;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -60,40 +67,74 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-    switch (Constants.currentMode) {
-      case REAL:
-        // Real robot, instantiate hardware IO implementations
-        drive =
-            new Drive(
-                new GyroIONavX(),
-                new ModuleIOSpark(0),
-                new ModuleIOSpark(1),
-                new ModuleIOSpark(2),
-                new ModuleIOSpark(3));
-        break;
+    // Subsystems
+    intake = new Intake();
+    shooter = new Shooter(new ShooterIOReal());
+    led = new LED();
 
-      case SIM:
-        // Sim robot, instantiate physics sim IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim(),
-                new ModuleIOSim());
-        break;
+    drive =
+        new Drive(
+            new GyroIONavX(),
+            new ModuleIOSpark(0),
+            new ModuleIOSpark(1),
+            new ModuleIOSpark(2),
+            new ModuleIOSpark(3));
+    
+    vision =
+        new Vision(
+            drive::addVisionMeasurement,
+            new VisionIOPhotonVision(camera0Name, robotToCamera0),
+            new VisionIOPhotonVision(camera1Name, robotToCamera1));
+    
+    // Commands
+    // Intake Commands
+    deployIntake = new DeployIntake(intake);
+    intakeFuel = new IntakeFuel(intake);
+    agitate = new Agitate(intake);
 
-      default:
-        // replayed robot, disable IO implementations
-        drive =
-            new Drive(
-                new GyroIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {},
-                new ModuleIO() {});
-        break;
-    }
+    // Shooter Commands
+    shootOnFly =
+        new DriveAimSOTF(
+            drive,
+            shooter,
+            null,
+            () -> -controller.getLeftY(),
+            () -> -controller.getLeftX());
+
+    // switch (Constants.currentMode) {
+    //   case REAL:
+    //     // Real robot, instantiate hardware IO implementations
+    //     drive =
+    //         new Drive(
+    //             new GyroIONavX(),
+    //             new ModuleIOSpark(0),
+    //             new ModuleIOSpark(1),
+    //             new ModuleIOSpark(2),
+    //             new ModuleIOSpark(3));
+    //     break;
+
+    //   case SIM:
+    //     // Sim robot, instantiate physics sim IO implementations
+    //     drive =
+    //         new Drive(
+    //             new GyroIO() {},
+    //             new ModuleIOSim(),
+    //             new ModuleIOSim(),
+    //             new ModuleIOSim(),
+    //             new ModuleIOSim());
+    //     break;
+
+    //   default:
+    //     // replayed robot, disable IO implementations
+    //     drive =
+    //         new Drive(
+    //             new GyroIO() {},
+    //             new ModuleIO() {},
+    //             new ModuleIO() {},
+    //             new ModuleIO() {},
+    //             new ModuleIO() {});
+    //     break;
+    // }
 
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
@@ -166,6 +207,15 @@ public class RobotContainer {
     //         Commands.stop(
     //             () ->
     //                 intake.stopIntake()));
+    // Shooter Buttons
+    controller
+        .rightTrigger(.5)
+        .whileTrue(shootOnFly);
+    
+
+  //intake buttons
+   controller.rightBumper();
+   
   }
 
   /**
