@@ -50,7 +50,7 @@ public class RobotContainer {
 
   // Commands
   // Shooter Commands
-  private final driveaimsotf
+  private final DriveAimSOTF shootOnFly
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
