@@ -9,7 +9,6 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs.IntakeConfigs;
 import frc.robot.Constants.IntakeConstants;
@@ -25,8 +24,10 @@ public class Intake extends SubsystemBase {
     intakeMotor = new SparkMax(IntakeConstants.kIntakeMotorId, MotorType.kBrushless);
     encoder = deployMotor.getAbsoluteEncoder();
 
-    deployMotor.configure(IntakeConfigs.deployConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    intakeMotor.configure(IntakeConfigs.intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    deployMotor.configure(
+        IntakeConfigs.deployConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    intakeMotor.configure(
+        IntakeConfigs.intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   // used to lower and raise intake
@@ -48,7 +49,7 @@ public class Intake extends SubsystemBase {
     intakeMotor.stopMotor();
   }
 
-  public double getPosition(){
+  public double getPosition() {
     return encoder.getPosition();
   }
 
@@ -64,7 +65,3 @@ public class Intake extends SubsystemBase {
     }
   }
 }
-
-
-  
-

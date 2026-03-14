@@ -35,7 +35,7 @@ public final class Constants {
   }
 
   public static final class IntakeConstants {
-    //Intake motor confugurations 
+    // Intake motor confugurations
     public static final int kDeployMotorId = 11;
     public static final int kIntakeMotorId = 12;
     public static int kSensorAnalogPort;

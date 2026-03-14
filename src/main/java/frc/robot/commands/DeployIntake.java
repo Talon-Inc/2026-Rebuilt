@@ -12,9 +12,9 @@ import frc.robot.subsystems.intake.Intake;
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class DeployIntake extends InstantCommand {
   private Intake intake;
-  
-    public DeployIntake(Intake intake) {
-      // Use addRequirements() here to declare subsystem dependencies.
+
+  public DeployIntake(Intake intake) {
+    // Use addRequirements() here to declare subsystem dependencies.
     this.intake = intake;
   }
 

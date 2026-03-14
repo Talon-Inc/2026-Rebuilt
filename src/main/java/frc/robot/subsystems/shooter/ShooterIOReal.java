@@ -11,8 +11,6 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
-
-import frc.robot.Configs.ShooterConfigs;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterIOReal implements ShooterIO {
@@ -60,7 +58,8 @@ public class ShooterIOReal implements ShooterIO {
 
   // -- LOGIC --
 
-  // Update Inputs functions as a way to update the Values in the Logging framework from the REAL sensor values
+  // Update Inputs functions as a way to update the Values in the Logging framework from the REAL
+  // sensor values
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
     // Primary Flywheel
@@ -72,7 +71,6 @@ public class ShooterIOReal implements ShooterIO {
     inputs.primaryFollowerVolts =
         primaryFollower.getAppliedOutput() * primaryFollower.getBusVoltage();
     inputs.primaryFollowerAmps = new double[] {primaryFollower.getOutputCurrent()};
-  
   }
 
   @Override

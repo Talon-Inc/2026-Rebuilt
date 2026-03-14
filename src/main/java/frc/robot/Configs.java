@@ -7,7 +7,6 @@ package frc.robot;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-
 /** Add your docs here. */
 public final class Configs {
   public static final class ClimberConfigs {
@@ -34,9 +33,9 @@ public final class Configs {
       deployConfig
           .absoluteEncoder
           .setSparkMaxDataPortConfig() // Tells Spark Max to use the data port
-          .inverted(false)             
+          .inverted(false)
           .positionConversionFactor(360) // Convert to degrees
-          .zeroOffset(0.0);           
+          .zeroOffset(0.0);
 
       // Configure basic settings of the intake motor
       intakeConfig
@@ -51,7 +50,7 @@ public final class Configs {
     public static final SparkMaxConfig feederMotor = new SparkMaxConfig();
     public static final SparkMaxConfig topShooter = new SparkMaxConfig();
     public static final SparkMaxConfig bottomShooter = new SparkMaxConfig();
-    
+
     static {
       // Configure basic settings of the feeder motor
       feederMotor
@@ -66,7 +65,6 @@ public final class Configs {
           .smartCurrentLimit(50)
           .voltageCompensation(12)
           .inverted(true);
-
 
       /*
        * Configure the closed loop controller. We want to make sure we set the
@@ -110,6 +108,6 @@ public final class Configs {
       //     .maxVelocity(4200)
       //     .maxAcceleration(6000)
       //     .allowedClosedLoopError(0.5);
-    } 
+    }
   }
 }
