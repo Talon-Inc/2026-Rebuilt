@@ -38,7 +38,6 @@ public final class Constants {
     // Intake motor confugurations
     public static final int kDeployMotorId = 11;
     public static final int kIntakeMotorId = 12;
-    public static int kSensorAnalogPort;
   }
 
   public static final class ShooterConstants {
@@ -54,33 +53,16 @@ public final class Constants {
     public static final int kKickerId = 13;
 
     // Primary Flywheel (e.g. Bottom Roller) - 2 Motors
-    public static final int kPrimaryLeaderID = 20;
-    public static final int kPrimaryFollowerID = 21;
+    public static final int kPrimaryLeaderId = 20;
+    public static final int kPrimaryFollowerId = 21;
 
     // Secondary Flywheel (e.g. Top Roller) - 2 Motors
-    public static final int kSecondaryLeaderID = 24;
-    public static final int kSecondaryFollowerID = 25;
-
-    // Hoods
-    public static final int kPrimaryHoodID = 22;
-    public static final int kSecondaryHoodID = 23;
+    public static final int kSecondaryLeaderId = 24;
+    public static final int kSecondaryFollowerId = 25;
 
     // --- Flywheel Constants (Bang-Bang) ---
     public static final double kFlywheelToleranceRPM = 50.0;
     public static final double kMaxRPM = 5700.0;
     public static final double kBangBangVoltage = 12.0;
-
-    // --- Hood Constants ---
-    public static final double kHoodGearRatio = 100.0;
-    public static final double kHoodMinAngleRad = Units.degreesToRadians(20);
-    public static final double kHoodMaxAngleRad = Units.degreesToRadians(60);
-
-    // Hood PID
-    public static final double kHoodkP = 4.0;
-    public static final double kHoodkI = 0.0;
-    public static final double kHoodkD = 0.0;
-
-    public static final double kHoodMaxVel = Units.degreesToRadians(120);
-    public static final double kHoodMaxAccel = Units.degreesToRadians(240);
   }
 }

@@ -4,11 +4,12 @@
 
 package frc.robot.subsystems.shooter;
 
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.util.LoggedTunableNumber;
-import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
@@ -49,19 +50,25 @@ public class Shooter extends SubsystemBase {
     // Run Flywheel Logic
     runFlywheel(primaryBang, inputs.primaryLeaderRPM, targetPrimaryRPM, true, flyVolts.get());
 
+    if (ShooterConstants.kIsDoubleFlywheel) {
+      runFlywheel(
+          secondaryBang, inputs.secondaryLeaderRPM, targetSecondaryPRM, false, flyVolts.get());
+    }
+
     // Log Goals
     Logger.recordOutput("Shooter/Goal/PrimaryRPM", targetPrimaryRPM);
+    Logger.recordOutput("Shooter/Goal/SecondaryRPM", targetSecondaryPRM);
     Logger.recordOutput("Shooter/Goal/KickerRPM", targetKickerRPM);
   }
 
   // Core Bang-Bang Logic
   private void runFlywheel(
-      BangBangController controller,
-      double currentRPM,
-      double target,
-      boolean isPrimary,
-      double voltageToUse) {
-    // Only run if we actualy have a target (aooids jitter at 0 RPM)
+    BangBangController controller,
+    double currentRPM,
+    double target,
+    boolean isPrimary,
+    double voltageToUse) {
+    // Only run if we actualy have a target (avoids jitter at 0 RPM)
     if (target > 50.0) {
       // .calculate() returns 1.0 if we need speed, 0.0 if we don't
       double demand = controller.calculate(currentRPM, target);
@@ -69,9 +76,13 @@ public class Shooter extends SubsystemBase {
       // Multiply by Max Voltage (12V)
       double volts = demand * voltageToUse;
 
+      if (isPrimary) io.setPrimaryVolts(volts);
+      else io.setSecondaryVolts(volts);
       io.setPrimaryVolts(volts);
     } else {
       // Idle Mode
+      if (isPrimary) io.setPrimaryVolts(0.0);
+      else io.setSecondaryVolts(0.0);
       io.setPrimaryVolts(0.0);
     }
   }
@@ -88,7 +99,7 @@ public class Shooter extends SubsystemBase {
   }
 
   // Sets different speeds for Top and Bottom Rollers
-  // Thisi s useful  for controlling spin (backspin/topspin)
+  // This is useful  for controlling spin (backspin/topspin)
   public void setSplitSpeeds(double primaryRPM, double secondaryRPM) {
     this.targetPrimaryRPM = primaryRPM;
     this.targetSecondaryPRM = secondaryRPM;
@@ -114,6 +125,6 @@ public class Shooter extends SubsystemBase {
 
   // kicker (wheels that feed into the shooter)
   public void setKickerSpeed(double speed) {
-    io.setKickerVolts(speed * 12);
+    io.setKickerSpeed(speed);
   }
 }
