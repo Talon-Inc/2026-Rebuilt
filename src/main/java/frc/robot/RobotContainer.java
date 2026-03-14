@@ -9,10 +9,7 @@ package frc.robot;
 
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
-import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
-
 import com.pathplanner.lib.auto.AutoBuilder;
-
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -26,6 +23,8 @@ import frc.robot.commands.DeployIntake;
 import frc.robot.commands.DriveAimSOTF;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IntakeFuel;
+import frc.robot.commands.Shoot;
+import frc.robot.commands.ShootCommand;
 import frc.robot.subsystems.LED;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIONavX;
@@ -35,6 +34,7 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -58,6 +58,8 @@ public class RobotContainer {
 
   // Shooter Commands
   private final DriveAimSOTF shootOnFly;
+  private final ShootCommand shootCommand;
+  private final Shoot shoot;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -79,13 +81,13 @@ public class RobotContainer {
             new ModuleIOSpark(1),
             new ModuleIOSpark(2),
             new ModuleIOSpark(3));
-    
+
     vision =
         new Vision(
             drive::addVisionMeasurement,
             new VisionIOPhotonVision(camera0Name, robotToCamera0),
             new VisionIOPhotonVision(camera1Name, robotToCamera1));
-    
+
     // Commands
     // Intake Commands
     deployIntake = new DeployIntake(intake);
@@ -95,12 +97,10 @@ public class RobotContainer {
     // Shooter Commands
     shootOnFly =
         new DriveAimSOTF(
-            drive,
-            shooter,
-            null,
-            () -> -controller.getLeftY(),
-            () -> -controller.getLeftX());
+            drive, shooter, null, () -> -controller.getLeftY(), () -> -controller.getLeftX());
 
+    shootCommand = new ShootCommand(shooter, drive, Constants.FieldConstants.Goals.blueHub);
+    shoot = new Shoot(shooter);
     // switch (Constants.currentMode) {
     //   case REAL:
     //     // Real robot, instantiate hardware IO implementations
@@ -208,14 +208,10 @@ public class RobotContainer {
     //             () ->
     //                 intake.stopIntake()));
     // Shooter Buttons
-    controller
-        .rightTrigger(.5)
-        .whileTrue(shootOnFly);
-    
-
-  //intake buttons
-   controller.rightBumper();
-   
+    // controller.rightTrigger(.5).whileTrue(shoot);
+    controller.rightBumper().whileTrue(shoot);
+    // intake buttons
+    controller.leftBumper().whileTrue(intakeFuel);
   }
 
   /**

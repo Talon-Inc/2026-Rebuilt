@@ -58,8 +58,8 @@ public final class Constants {
     public static final int kPrimaryFollowerId = 15;
 
     // Secondary Flywheel (e.g. Top Roller) - 2 Motors
-    public static final int kSecondaryLeaderId = 15;
-    public static final int kSecondaryFollowerId = 16;
+    public static final int kSecondaryLeaderId = 16;
+    public static final int kSecondaryFollowerId = 17;
 
     // --- Flywheel Constants (Bang-Bang) ---
     public static final double kFlywheelToleranceRPM = 50.0;
@@ -70,11 +70,14 @@ public final class Constants {
   public static final class FieldConstants {
     public static final double fieldLength = Units.inchesToMeters(651.22);
     public static final double fieldWidth = Units.inchesToMeters(317.69);
-    public static final Translation2d hubTranslation = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
+    public static final Translation2d hubTranslation =
+        new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
 
     public static final class Goals {
-      public static final Translation2d blueHub = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
-      public static final Translation2d redHub = new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
+      public static final Translation2d blueHub =
+          new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
+      public static final Translation2d redHub =
+          new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
     }
   }
 }

@@ -40,6 +40,7 @@ public interface ShooterIO {
 
   // Run the shooters (Volts)
   public default void setPrimaryVolts(double volts) {}
+
   public default void setSecondaryVolts(double volts) {}
 
   // Configure PID Constants (Optional If tuning Via Advantage Scope)

@@ -5,16 +5,16 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.shooter.Shooter;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class IntakeFuel extends Command {
-  private final Intake intake;
+public class Shoot extends Command {
+  private final Shooter shooter;
 
-  /** Creates a new IntakeFuel. */
-  public IntakeFuel(Intake intake) {
+  /** Creates a new Shoot. */
+  public Shoot(Shooter shooter) {
+    this.shooter = shooter;
     // Use addRequirements() here to declare subsystem dependencies.
-    this.intake = intake;
   }
 
   // Called when the command is initially scheduled.
@@ -24,13 +24,17 @@ public class IntakeFuel extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    intake.runIntake(.5);
+    shooter.setMotorVoltage(.25 * 12);
+    // if (shooter.isAtSpeed()) {
+    shooter.setKickerSpeed(.5);
+    // }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    intake.stopIntake();
+    shooter.setKickerSpeed(0);
+    shooter.setMotorVoltage(0);
   }
 
   // Returns true when the command should end.

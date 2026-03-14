@@ -20,6 +20,10 @@ public class ShootingPhysics {
   // Key: Distance (m), Value: Hood Angle (Degrees)
   private static final InterpolatingDoubleTreeMap hoodMap = new InterpolatingDoubleTreeMap();
 
+  private static final InterpolatingDoubleTreeMap bottomRPMMap = new InterpolatingDoubleTreeMap();
+
+  private static final InterpolatingDoubleTreeMap topRPMMap = new InterpolatingDoubleTreeMap();
+
   static {
     // The More the data you put the more accurate it's going to be
     // But don't put too much
@@ -32,12 +36,16 @@ public class ShootingPhysics {
 
     // Hood Angle
     hoodMap.put(null, null);
+
+    bottomRPMMap.put(2.0, 600.0);
+
+    topRPMMap.put(2.0, 600.0);
   }
 
   public record ShootSolution(
       Rotation2d robotHeading, // Field-Relative Robot/Turret Angle
-      double flywheelRPM, // Adjusted RPM
-      double hoodAngleRad, // Hood POsition
+      double topRPM, // Adjusted Top RPM
+      double bottomRPM,
       double effectiveDist // This is for debugging
       ) {}
 
@@ -86,11 +94,10 @@ public class ShootingPhysics {
 
     // RPM & Hood: This part tells the shooter to shoot harder/higher
     // if we are moving away
-    double targetRPM = rpmMap.get(effectiveDistance);
-    double targetHoodDeg = hoodMap.get(effectiveDistance);
+    double topRPM = topRPMMap.get(effectiveDistance);
+    double bottomRPM = bottomRPMMap.get(effectiveDistance);
 
-    return new ShootSolution(
-        targetHeading, targetRPM, Units.degreesToRadians(targetHoodDeg), effectiveDistance);
+    return new ShootSolution(targetHeading, topRPM, bottomRPM, effectiveDistance);
   }
 
   // ***DISCLAIMER**

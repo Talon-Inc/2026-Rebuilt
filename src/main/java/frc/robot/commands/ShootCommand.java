@@ -4,17 +4,26 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.util.ShootingPhysics;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ShootCommand extends Command {
   private final Shooter shooter;
+  private final Drive drive;
+  private final Translation2d targetSupplier;
 
   /** Creates a new ShootCommand. */
-  public ShootCommand(Shooter shooter) {
+  public ShootCommand(Shooter shooter, Drive drive, Translation2d target) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
+    this.drive = drive;
+    this.targetSupplier = target;
   }
 
   // Called when the command is initially scheduled.
@@ -26,9 +35,13 @@ public class ShootCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (shooter.isAtSpeed()) {
-      shooter.setKickerSpeed(.5);
-    }
+    Pose2d robotPose = drive.getPose();
+    ChassisSpeeds fieldSpeeds =
+        ChassisSpeeds.fromFieldRelativeSpeeds(drive.getChassisSpeeds(), drive.getRotation());
+    var solution = ShootingPhysics.calculateShot(robotPose, fieldSpeeds, targetSupplier);
+
+    shooter.setSplitSpeeds(1500, 1500);
+    shooter.setKickerSpeed(.5);
   }
 
   // Called once the command ends or is interrupted.

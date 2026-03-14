@@ -43,7 +43,7 @@ public final class Configs {
           .idleMode(IdleMode.kCoast)
           .smartCurrentLimit(30)
           .voltageCompensation(12)
-          .inverted(false);
+          .inverted(true);
     }
   }
 
@@ -51,30 +51,26 @@ public final class Configs {
     public static final SparkFlexConfig leaderConfig = new SparkFlexConfig();
     public static final SparkFlexConfig followerConfig = new SparkFlexConfig();
     public static final SparkMaxConfig kickerConfig = new SparkMaxConfig();
-    
+
     static {
       // Configure basic settings of the leader motor
       leaderConfig
           .idleMode(IdleMode.kCoast)
           .smartCurrentLimit(60) // High current limit for Bang-Bang Recovery
           .voltageCompensation(12)
-          .inverted(true);
-      
+          .inverted(false);
+
       // Configure basic settings of the follower motor
       // Added follow in ShooterIOReal
-      followerConfig
-          .idleMode(IdleMode.kCoast)
-          .smartCurrentLimit(60)
-          .voltageCompensation(12);
-          // .follow(primaryLeader, true);
+      followerConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(60).voltageCompensation(12);
+      // .follow(primaryLeader, true);
 
       // Configure basic settings of the kicker/feeder motor
       kickerConfig
           .idleMode(IdleMode.kCoast)
           .smartCurrentLimit(50)
           .voltageCompensation(12)
-          .inverted(false);
-
+          .inverted(true);
 
       /*
        * Configure the closed loop controller. We want to make sure we set the
@@ -118,6 +114,6 @@ public final class Configs {
       //     .maxVelocity(4200)
       //     .maxAcceleration(6000)
       //     .allowedClosedLoopError(0.5);
-    } 
+    }
   }
 }

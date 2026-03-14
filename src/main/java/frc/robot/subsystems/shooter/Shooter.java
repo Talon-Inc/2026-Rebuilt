@@ -4,12 +4,11 @@
 
 package frc.robot.subsystems.shooter;
 
-import org.littletonrobotics.junction.Logger;
-
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.util.LoggedTunableNumber;
+import org.littletonrobotics.junction.Logger;
 
 public class Shooter extends SubsystemBase {
   private final ShooterIO io;
@@ -63,11 +62,11 @@ public class Shooter extends SubsystemBase {
 
   // Core Bang-Bang Logic
   private void runFlywheel(
-    BangBangController controller,
-    double currentRPM,
-    double target,
-    boolean isPrimary,
-    double voltageToUse) {
+      BangBangController controller,
+      double currentRPM,
+      double target,
+      boolean isPrimary,
+      double voltageToUse) {
     // Only run if we actualy have a target (avoids jitter at 0 RPM)
     if (target > 50.0) {
       // .calculate() returns 1.0 if we need speed, 0.0 if we don't
@@ -126,5 +125,9 @@ public class Shooter extends SubsystemBase {
   // kicker (wheels that feed into the shooter)
   public void setKickerSpeed(double speed) {
     io.setKickerSpeed(speed);
+  }
+
+  public void setMotorVoltage(double voltage) {
+    io.setPrimaryVolts(voltage);
   }
 }
