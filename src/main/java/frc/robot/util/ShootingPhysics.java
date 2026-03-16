@@ -10,6 +10,7 @@ import edu.wpi.first.math.util.Units;
 
 public class ShootingPhysics {
 
+  // SCORING MAPS
   // Key: Distance (m), Vlaue: Time of Flight (s)
   private static final InterpolatingDoubleTreeMap timeOfFlightMap =
       new InterpolatingDoubleTreeMap();
@@ -24,22 +25,43 @@ public class ShootingPhysics {
 
   private static final InterpolatingDoubleTreeMap topRPMMap = new InterpolatingDoubleTreeMap();
 
+  // PASSING MAPS
+  private static final InterpolatingDoubleTreeMap passTimeOfFlightMap =
+      new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap passTopRPM = new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap passBottomRPM = new InterpolatingDoubleTreeMap();
+
   static {
     // The More the data you put the more accurate it's going to be
     // But don't put too much
 
+    // Scoring Data
     // Time of flight (this can be tuned by recording in slo-mo)
-    timeOfFlightMap.put(null, null);
+    timeOfFlightMap.put(1.0, .2);
+    timeOfFlightMap.put(5.0, 1.0);
 
-    // RPM
-    rpmMap.put(null, null);
+    // Key: Distance(m), Value:RPM
+    bottomRPMMap.put(1.0, 2000.0);
+    bottomRPMMap.put(5.0, 4000.0);
 
-    // Hood Angle
-    hoodMap.put(null, null);
+    // Key: Distance(m), Value:RPM
+    topRPMMap.put(1.0, 2000.0);
+    topRPMMap.put(5.0, 4000.0);
 
-    bottomRPMMap.put(2.0, 600.0);
+    // Passing Data
+    passTimeOfFlightMap.put(2.0, 0.4);
+    passTimeOfFlightMap.put(8.0, 1.2);
 
-    topRPMMap.put(2.0, 600.0);
+    passTopRPM.put(2.0, 1000.0);
+    passTopRPM.put(8.0, 2000.0);
+
+    passBottomRPM.put(2.0, 2000.0);
+    passBottomRPM.put(8.0, 4000.0);
+  }
+
+  public enum ShotType {
+    SCORE,
+    PASS
   }
 
   public record ShootSolution(
@@ -98,6 +120,34 @@ public class ShootingPhysics {
     double bottomRPM = bottomRPMMap.get(effectiveDistance);
 
     return new ShootSolution(targetHeading, topRPM, bottomRPM, effectiveDistance);
+  }
+
+  // Calculate Pass
+  public static ShootSolution calculatePass(
+      Pose2d currentPose, ChassisSpeeds fieldRelativeSpeeds, Translation2d targetLocation) {
+    double currentDistance = targetLocation.getDistance(currentPose.getTranslation());
+    double timeOfFlight = 0.0;
+    Translation2d virtualGoalLocation = targetLocation;
+    double effectiveDistance = currentDistance;
+
+    for (int i = 0; i < 5; i++) {
+      timeOfFlight = passTimeOfFlightMap.get(effectiveDistance);
+      double virtualGoalX =
+          targetLocation.getX() - (fieldRelativeSpeeds.vxMetersPerSecond * timeOfFlight);
+      double virtualGoalY =
+          targetLocation.getY() - (fieldRelativeSpeeds.vyMetersPerSecond * timeOfFlight);
+
+      virtualGoalLocation = new Translation2d(virtualGoalX, virtualGoalY);
+      effectiveDistance = virtualGoalLocation.getDistance(currentPose.getTranslation());
+    }
+
+    Rotation2d targetHeading = virtualGoalLocation.minus(currentPose.getTranslation()).getAngle();
+
+    return new ShootSolution(
+        targetHeading,
+        passTopRPM.get(effectiveDistance),
+        passBottomRPM.get(effectiveDistance),
+        effectiveDistance);
   }
 
   // ***DISCLAIMER**

@@ -16,13 +16,9 @@ public class ShooterIOReal implements ShooterIO {
   // Kicker motor
   private final SparkMax kicker;
 
-  // Primary Set
-  private final SparkFlex primaryLeader;
-  private final SparkFlex primaryFollower;
-
-  // Secondary Set (Optional)
-  // private final SparkFlex secondaryLeader;
-  // private final SparkFlex secondaryFollower;
+  // Motors
+  private final SparkFlex topMotor;
+  private final SparkFlex bottomMotor;
 
   public ShooterIOReal() {
     // --- 1. Kicker Setup ---
@@ -34,43 +30,21 @@ public class ShooterIOReal implements ShooterIO {
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    // --- 2. Primary Flywheel Setup ---
-    primaryLeader = new SparkFlex(ShooterConstants.kPrimaryLeaderId, MotorType.kBrushless);
-    primaryFollower = new SparkFlex(ShooterConstants.kPrimaryFollowerId, MotorType.kBrushless);
+    // --- 2. Motor Setup ---
+    topMotor = new SparkFlex(ShooterConstants.kTopMotorId, MotorType.kBrushless);
+    bottomMotor = new SparkFlex(ShooterConstants.kBottomMotorId, MotorType.kBrushless);
 
-    // Configure Leader
-    primaryLeader.configure(
+    // Configure Motors
+    topMotor.configure(
         ShooterConfigs.leaderConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    // Configure Follower (Follows Leader)
-    ShooterConfigs.followerConfig.follow(primaryLeader, true);
-    primaryFollower.configure(
+    // ShooterConfigs.followerConfig.follow(topMotor, true);
+    bottomMotor.configure(
         ShooterConfigs.followerConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
-
-    // // --- 3. Secondary Flywheel Setup ---
-    // if (ShooterConstants.kIsDoubleFlywheel) {
-    //   secondaryLeader = new SparkFlex(ShooterConstants.kSecondaryLeaderId, MotorType.kBrushless);
-    //   secondaryFollower =
-    //       new SparkFlex(ShooterConstants.kSecondaryFollowerId, MotorType.kBrushless);
-
-    //   secondaryLeader.configure(
-    //       ShooterConfigs.leaderConfig,
-    //       ResetMode.kResetSafeParameters,
-    //       PersistMode.kPersistParameters);
-
-    //   ShooterConfigs.followerConfig.follow(secondaryLeader, true);
-    //   secondaryFollower.configure(
-    //       ShooterConfigs.followerConfig,
-    //       ResetMode.kResetSafeParameters,
-    //       PersistMode.kPersistParameters);
-    // } else {
-    //   secondaryLeader = null;
-    //   secondaryFollower = null;
-    // }
   }
 
   // -- LOGIC --
@@ -81,25 +55,13 @@ public class ShooterIOReal implements ShooterIO {
   public void updateInputs(ShooterIOInputs inputs) {
     // Primary Flywheel
     // inputs.[value name] sets the value for the variables you created in ShooterIO
-    inputs.primaryLeaderRPM = primaryLeader.getEncoder().getVelocity();
-    inputs.primaryLeaderVolts = primaryLeader.getAppliedOutput() * primaryFollower.getBusVoltage();
-    inputs.primaryLeaderAmps = new double[] {primaryFollower.getOutputCurrent()};
+    inputs.topRPM = topMotor.getEncoder().getVelocity();
+    inputs.topVolts = topMotor.getAppliedOutput() * topMotor.getBusVoltage();
+    inputs.topAmps = new double[] {topMotor.getOutputCurrent()};
 
-    inputs.primaryFollowerVolts =
-        primaryFollower.getAppliedOutput() * primaryFollower.getBusVoltage();
-    inputs.primaryFollowerAmps = new double[] {primaryFollower.getOutputCurrent()};
-
-    // // Secondary Flywheel
-    // if (secondaryLeader != null) {
-    //   inputs.secondaryLeaderRPM = secondaryLeader.getEncoder().getVelocity();
-    //   inputs.secondaryLeaderVolts =
-    //       secondaryLeader.getAppliedOutput() * secondaryLeader.getBusVoltage();
-    //   inputs.secondaryLeaderAmps = new double[] {secondaryFollower.getOutputCurrent()};
-
-    //   inputs.secondaryFollowerVolts =
-    //       secondaryFollower.getAppliedOutput() * secondaryFollower.getBusVoltage();
-    //   inputs.secondaryFollowerAmps = new double[] {secondaryFollower.getOutputCurrent()};
-    // }
+    inputs.bottomRPM = bottomMotor.getEncoder().getVelocity();
+    inputs.bottomVolts = bottomMotor.getAppliedOutput() * bottomMotor.getBusVoltage();
+    inputs.bottomAmps = new double[] {bottomMotor.getOutputCurrent()};
   }
 
   @Override
@@ -108,12 +70,12 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setPrimaryVolts(double volts) {
-    primaryLeader.setVoltage(volts);
+  public void setTopVolts(double volts) {
+    topMotor.setVoltage(volts);
   }
 
-  // @Override
-  // public void setSecondaryVolts(double volts) {
-  //   secondaryLeader.setVoltage(volts);
-  // }
+  @Override
+  public void setBottomVolts(double volts) {
+    bottomMotor.setVoltage(volts);
+  }
 }

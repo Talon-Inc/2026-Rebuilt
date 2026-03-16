@@ -11,26 +11,30 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.util.ShootingPhysics;
+import frc.robot.util.ShootingPhysics.ShotType;
+import java.util.function.Supplier;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ShootCommand extends Command {
   private final Shooter shooter;
   private final Drive drive;
-  private final Translation2d targetSupplier;
+  private final Supplier<Translation2d> targetSupplier;
+  private final ShootingPhysics.ShotType shotType;
 
   /** Creates a new ShootCommand. */
-  public ShootCommand(Shooter shooter, Drive drive, Translation2d target) {
+  public ShootCommand(Shooter shooter, Drive drive, Supplier<Translation2d> target, ShotType type) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
     this.drive = drive;
     this.targetSupplier = target;
+    this.shotType = type;
+
+    addRequirements(shooter);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    shooter.setTargetSpeed(600);
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -38,10 +42,22 @@ public class ShootCommand extends Command {
     Pose2d robotPose = drive.getPose();
     ChassisSpeeds fieldSpeeds =
         ChassisSpeeds.fromFieldRelativeSpeeds(drive.getChassisSpeeds(), drive.getRotation());
-    var solution = ShootingPhysics.calculateShot(robotPose, fieldSpeeds, targetSupplier);
+    ShootingPhysics.ShootSolution solution;
 
-    shooter.setSplitSpeeds(1500, 1500);
-    shooter.setKickerSpeed(.5);
+    if (this.shotType == ShootingPhysics.ShotType.SCORE) {
+      solution = ShootingPhysics.calculateShot(robotPose, fieldSpeeds, targetSupplier.get());
+    } else {
+      solution = ShootingPhysics.calculatePass(robotPose, fieldSpeeds, targetSupplier.get());
+    }
+
+    shooter.setSplitSpeeds(solution.bottomRPM(), solution.topRPM());
+
+    // This is so it only feeds the ball when the flywheels are ready
+    if (shooter.isAtSpeed()) {
+      shooter.setKickerSpeed(0.5);
+    } else {
+      shooter.setKickerSpeed(0.0);
+    }
   }
 
   // Called once the command ends or is interrupted.
