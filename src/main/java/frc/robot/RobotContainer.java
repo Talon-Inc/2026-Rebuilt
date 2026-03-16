@@ -10,8 +10,6 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,6 +21,7 @@ import frc.robot.commands.DeployIntake;
 import frc.robot.commands.DriveAimSOTF;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IntakeFuel;
+import frc.robot.commands.MoveIntake;
 import frc.robot.commands.Shoot;
 import frc.robot.commands.ShootCommand;
 import frc.robot.subsystems.LED;
@@ -53,6 +52,8 @@ public class RobotContainer {
   // Commands
   // Intake Commands
   private final DeployIntake deployIntake;
+  private final MoveIntake mIntakeDeploy;
+  private final MoveIntake mIntakeUndeploy;
   private final IntakeFuel intakeFuel;
   private final Agitate agitate;
 
@@ -90,7 +91,9 @@ public class RobotContainer {
 
     // Commands
     // Intake Commands
-    deployIntake = new DeployIntake(intake);
+    deployIntake = new DeployIntake(intake, .1);
+    mIntakeDeploy = new MoveIntake(intake, .1);
+    mIntakeUndeploy = new MoveIntake(intake, -.1);
     intakeFuel = new IntakeFuel(intake);
     agitate = new Agitate(intake);
 
@@ -175,28 +178,28 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     // Lock to 0° when A button is held
-    controller
-        .a()
-        .whileTrue(
-            DriveCommands.joystickDriveAtAngle(
-                drive,
-                () -> -controller.getLeftY(),
-                () -> -controller.getLeftX(),
-                () -> Rotation2d.kZero));
+    // controller
+    //     .a()
+    //     .whileTrue(
+    //         DriveCommands.joystickDriveAtAngle(
+    //             drive,
+    //             () -> -controller.getLeftY(),
+    //             () -> -controller.getLeftX(),
+    //             () -> Rotation2d.kZero));
 
     // Switch to X pattern when X button is pressed
     controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
-    controller
-        .b()
-        .onTrue(
-            Commands.runOnce(
-                    () ->
-                        drive.setPose(
-                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-                    drive)
-                .ignoringDisable(true));
+    // controller
+    //     .b()
+    //     .onTrue(
+    //         Commands.runOnce(
+    //                 () ->
+    //                     drive.setPose(
+    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+    //                 drive)
+    //             .ignoringDisable(true));
 
     // controller
     //     .y()
@@ -209,9 +212,11 @@ public class RobotContainer {
     //                 intake.stopIntake()));
     // Shooter Buttons
     // controller.rightTrigger(.5).whileTrue(shoot);
-    controller.rightBumper().whileTrue(shoot);
+    controller.rightTrigger().whileTrue(shoot);
     // intake buttons
-    controller.leftBumper().whileTrue(intakeFuel);
+    controller.leftTrigger().whileTrue(intakeFuel);
+    controller.y().whileTrue(mIntakeDeploy);
+    controller.a().whileTrue(mIntakeUndeploy);
   }
 
   /**
