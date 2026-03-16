@@ -10,7 +10,7 @@ import edu.wpi.first.math.util.Units;
 
 public class ShootingPhysics {
 
-  // Key: Distance (m), Vlaue: Time of Flight (s)
+  // Key: Distance (m), Value: Time of Flight (s)
   private static final InterpolatingDoubleTreeMap timeOfFlightMap =
       new InterpolatingDoubleTreeMap();
 
@@ -103,12 +103,14 @@ public class ShootingPhysics {
   // ***DISCLAIMER**
   // THESE ARE OLD CODE; it was used to calculate SOTF using Vectors * latency
   // Mock Lookup Table: Distance (m) -> Horizontal Velocity (m/s)
+  @SuppressWarnings("unused")
   private static double getStationaryHorizontalSpeed(double distance) {
     // Example: 6 m/s base  + linear increase
     return 8.0 + (distance * 1.2);
   }
 
   // Mock Lockup Table: distance(m) -> Hood Angle (rad)
+  @SuppressWarnings("unused")
   private static double getIdealHoodAngle(double dist) {
     // Example: closer = Higher shot (60 deg), Farther = Lower shot (30)
     // Linear Interpolation or Interpolation Double Tree Map recommended here
