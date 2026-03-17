@@ -17,7 +17,7 @@ public class LoggedTunableNumber {
     this.networkNumber = new LoggedNetworkNumber(dashboardKey, defaultValue);
 
     // Optional This is to push to SmartDashboard
-    SmartDashboard.putNumber(dashboardKey, defaultValue);
+    SmartDashboard.putNumber(this.key, this.defaultValue);
   }
 
   public double get() {
