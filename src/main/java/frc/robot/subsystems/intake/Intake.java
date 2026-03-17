@@ -8,7 +8,10 @@ import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs.IntakeConfigs;
@@ -18,6 +21,7 @@ public class Intake extends SubsystemBase {
   private final SparkMax deployMotor;
   private final SparkMax intakeMotor;
   private final AbsoluteEncoder encoder;
+  private final SparkClosedLoopController deployController;
   private double lowerLimit;
   private double upperLimit;
 
@@ -26,19 +30,22 @@ public class Intake extends SubsystemBase {
     deployMotor = new SparkMax(IntakeConstants.kDeployMotorId, MotorType.kBrushless);
     intakeMotor = new SparkMax(IntakeConstants.kIntakeMotorId, MotorType.kBrushless);
     encoder = deployMotor.getAbsoluteEncoder();
+    deployController = deployMotor.getClosedLoopController();
 
     deployMotor.configure(
         IntakeConfigs.deployConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     intakeMotor.configure(
         IntakeConfigs.intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    lowerLimit = 0;
-    upperLimit = 90;
+    lowerLimit = 5; // about 5 degrees to start
+    upperLimit = 85; // about 85 degress to end
   }
 
   // used to lower and raise intake
   // "+" lowers and "-" raises
+  // Units: speed = RPM
   public void deploy(double speed) {
+    deployController.setSetpoint(speed, ControlType.kVelocity);
     deployMotor.set(speed);
   }
 

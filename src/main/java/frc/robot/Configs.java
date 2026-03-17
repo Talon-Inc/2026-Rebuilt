@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
@@ -37,6 +38,13 @@ public final class Configs {
           .inverted(false)
           .positionConversionFactor(360) // Convert to degrees
           .zeroOffset(0.0);
+      deployConfig
+          .closedLoop
+          .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+          .pid(3, 0, 0)
+          .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
+          .kS(0)
+          .kV(0.01);
 
       // Configure basic settings of the intake motor
       intakeConfig
@@ -48,11 +56,18 @@ public final class Configs {
   }
 
   public static final class ShooterConfigs {
+    public static final SparkMaxConfig kickerConfig = new SparkMaxConfig();
     public static final SparkFlexConfig leaderConfig = new SparkFlexConfig();
     public static final SparkFlexConfig followerConfig = new SparkFlexConfig();
-    public static final SparkMaxConfig kickerConfig = new SparkMaxConfig();
 
     static {
+      // Configure basic settings of the kicker/feeder motor
+      kickerConfig
+          .idleMode(IdleMode.kCoast)
+          .smartCurrentLimit(50)
+          .voltageCompensation(12)
+          .inverted(true);
+
       // Configure basic settings of the leader motor
       leaderConfig
           .idleMode(IdleMode.kCoast)
@@ -62,15 +77,11 @@ public final class Configs {
 
       // Configure basic settings of the follower motor
       // Added follow in ShooterIOReal
-      followerConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(60).voltageCompensation(12);
-      // .follow(primaryLeader, true);
-
-      // Configure basic settings of the kicker/feeder motor
-      kickerConfig
+      followerConfig
           .idleMode(IdleMode.kCoast)
-          .smartCurrentLimit(50)
-          .voltageCompensation(12)
-          .inverted(true);
+          .smartCurrentLimit(60)
+          .voltageCompensation(12);
+      // .follow(primaryLeader, true);
 
       /*
        * Configure the closed loop controller. We want to make sure we set the
@@ -80,9 +91,7 @@ public final class Configs {
       //     .closedLoop
       //     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       //     // Set PID values for position control
-      //     .p(0.1)
-      //     .i(0)
-      //     .d(0)
+      //     .pid(0.1, 0, 0)
       //     .outputRange(-1, 1)
       //     .maxMotion
       //     // Set MAXMotion parameters for position control
