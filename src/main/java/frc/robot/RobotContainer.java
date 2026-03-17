@@ -10,11 +10,14 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.Agitate;
 import frc.robot.commands.DeployIntake;
@@ -33,6 +36,8 @@ import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.ShootingPhysics.ShotType;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -58,12 +63,10 @@ public class RobotContainer {
   private final Agitate agitate;
 
   // Shooter Commands
-  private final DriveAimSOTF shootOnFly;
-  private final ShootCommand shootCommand;
   private final Shoot shoot;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandPS5Controller controller = new CommandPS5Controller(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -99,11 +102,7 @@ public class RobotContainer {
     agitate = new Agitate(intake);
 
     // Shooter Commands
-    shootOnFly =
-        new DriveAimSOTF(
-            drive, shooter, null, () -> -controller.getLeftY(), () -> -controller.getLeftX());
 
-    shootCommand = new ShootCommand(shooter, drive, Constants.FieldConstants.Goals.blueHub);
     shoot = new Shoot(shooter);
     // switch (Constants.currentMode) {
     //   case REAL:
@@ -163,6 +162,22 @@ public class RobotContainer {
     configureButtonBindings();
   }
 
+  // Selects whether to pass to the left or right gap based on robot's Y position
+  private Translation2d getSmartPassTarget() {
+    Pose2d currentPose = drive.getPose();
+    double fieldCenterY = Constants.FieldConstants.fieldWidth / 2.0;
+
+    Translation2d baseTarget;
+
+    if (currentPose.getY() > fieldCenterY) {
+      baseTarget = Constants.FieldConstants.bluePassLeft;
+    } else {
+      baseTarget = Constants.FieldConstants.bluePassRight;
+    }
+
+    return AllianceFlipUtil.apply(baseTarget);
+  }
+
   /**
    * Use this method to define your button->command mappings. Buttons can be created by
    * instantiating a {@link GenericHID} or one of its subclasses ({@link
@@ -179,28 +194,28 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     // Lock to 0° when A button is held
-    // controller
-    //     .a()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             () -> Rotation2d.kZero));
+    controller
+        .square()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> Rotation2d.kZero));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    controller.cross().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
-    // controller
-    //     .b()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //                 () ->
-    //                     drive.setPose(
-    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-    //                 drive)
-    //             .ignoringDisable(true));
+    controller
+        .circle()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        drive.setPose(
+                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+                    drive)
+                .ignoringDisable(true));
 
     // controller
     //     .y()
@@ -213,11 +228,51 @@ public class RobotContainer {
     //                 intake.stopIntake()));
     // Shooter Buttons
     // controller.rightTrigger(.5).whileTrue(shoot);
-    controller.rightTrigger().whileTrue(shoot);
     // intake buttons
-    controller.leftTrigger().whileTrue(intakeFuel);
-    controller.y().whileTrue(mIntakeDeploy);
-    controller.a().whileTrue(mIntakeUndeploy);
+    controller.L1().whileTrue(intakeFuel);
+
+    // -- DEFAULT Scoring Buttons --
+
+    // Left Trigger: Aim at Hub
+    controller
+        .L2()
+        .whileTrue(
+            new DriveAimSOTF(
+                drive,
+                () -> AllianceFlipUtil.apply(Constants.FieldConstants.hubTranslation),
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                ShotType.SCORE));
+
+    // Right Bumper: Fire to Score
+    controller
+        .R1()
+        .whileTrue(
+            new ShootCommand(
+                shooter,
+                drive,
+                () -> AllianceFlipUtil.apply(Constants.FieldConstants.hubTranslation),
+                ShotType.SCORE));
+
+    // -- Passing Shots --
+
+    // Left Trigger + POV Left (Aim to the closest gap)
+    controller
+        .L1()
+        .and(controller.povLeft())
+        .whileTrue(
+            new DriveAimSOTF(
+                drive,
+                () -> getSmartPassTarget(),
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                ShotType.PASS));
+
+    // Right Bumper + POV Left (Fire to Pass)
+    controller
+        .R1()
+        .and(controller.povLeft())
+        .whileTrue(new ShootCommand(shooter, drive, () -> getSmartPassTarget(), ShotType.PASS));
   }
 
   /**

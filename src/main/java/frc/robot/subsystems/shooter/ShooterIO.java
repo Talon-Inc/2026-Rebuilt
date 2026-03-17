@@ -13,23 +13,15 @@ public interface ShooterIO {
     public double kickerVolts = 0.0;
     public double[] kickerAmps = new double[] {};
 
-    // --- Primary Set (Bottom) ---
-    public double primaryLeaderRPM = 0.0;
-    public double primaryLeaderVolts = 0.0;
-    public double[] primaryLeaderAmps = new double[] {};
+    // --- Top Motor ---
+    public double topRPM = 0.0;
+    public double topVolts = 0.0;
+    public double[] topAmps = new double[] {};
 
-    // Primary Follower Data
-    public double primaryFollowerVolts = 0.0;
-    public double[] primaryFollowerAmps = new double[] {};
-
-    // --- Secondary Set (Top) ---
-    public double secondaryLeaderRPM = 0.0;
-    public double secondaryLeaderVolts = 0.0;
-    public double[] secondaryLeaderAmps = new double[] {};
-
-    // Secondary Follower Data
-    public double secondaryFollowerVolts = 0.0;
-    public double[] secondaryFollowerAmps = new double[] {};
+    // --- Bottom Roller ---
+    public double bottomRPM = 0.0;
+    public double bottomVolts = 0.0;
+    public double[] bottomAmps = new double[] {};
   }
 
   // Updates the set of loggable inputs
@@ -39,9 +31,9 @@ public interface ShooterIO {
   public default void setKickerSpeed(double speed) {}
 
   // Run the shooters (Volts)
-  public default void setPrimaryVolts(double volts) {}
+  public default void setTopVolts(double volts) {}
 
-  public default void setSecondaryVolts(double volts) {}
+  public default void setBottomVolts(double volts) {}
 
   // Configure PID Constants (Optional If tuning Via Advantage Scope)
   public default void configurePID(double kP, double kI, double kD) {}
