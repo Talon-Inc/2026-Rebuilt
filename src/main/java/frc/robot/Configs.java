@@ -4,10 +4,12 @@
 
 package frc.robot;
 
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import frc.robot.Constants.IntakeConstants;
 
 /** Add your docs here. */
 public final class Configs {
@@ -41,10 +43,12 @@ public final class Configs {
       deployConfig
           .closedLoop
           .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-          .pid(3, 0, 0)
+          .p(IntakeConstants.kP)
+          .i(IntakeConstants.kI)
+          .d(IntakeConstants.kD)
           .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
-          .kS(0)
-          .kV(0.01);
+          .kS(IntakeConstants.kS)
+          .kV(IntakeConstants.kV);
 
       // Configure basic settings of the intake motor
       intakeConfig
@@ -91,20 +95,15 @@ public final class Configs {
       //     .closedLoop
       //     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
       //     // Set PID values for position control
-      //     .pid(0.1, 0, 0)
+      //     .p(0.1)
+      //     .i(0)
+      //     .d(0)
       //     .outputRange(-1, 1)
       //     .maxMotion
-      //     // Set MAXMotion parameters for position control
+      //     // Set MAXVelocity parameters for velocity control
       //     .maxVelocity(4200)
       //     .maxAcceleration(6000)
       //     .allowedClosedLoopError(0.5);
-
-      // Configure basic settings of the right shooter motor; invert the follower
-      // bottomShooter
-      //     .idleMode(IdleMode.kBrake)
-      //     .smartCurrentLimit(50)
-      //     .voltageCompensation(12)
-      //     .follow((int) Constants.ShooterConstants.leftShooterCanId, true);
 
       /*
        * Configure the closed loop controller. We want to make sure we set the
