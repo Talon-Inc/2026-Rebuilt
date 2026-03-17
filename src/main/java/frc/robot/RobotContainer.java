@@ -24,6 +24,7 @@ import frc.robot.commands.DeployIntake;
 import frc.robot.commands.DriveAimSOTF;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.IntakeFuel;
+import frc.robot.commands.MoveIntake;
 import frc.robot.commands.Shoot;
 import frc.robot.commands.ShootCommand;
 import frc.robot.subsystems.LED;
@@ -56,6 +57,8 @@ public class RobotContainer {
   // Commands
   // Intake Commands
   private final DeployIntake deployIntake;
+  private final MoveIntake mIntakeDeploy;
+  private final MoveIntake mIntakeUndeploy;
   private final IntakeFuel intakeFuel;
   private final Agitate agitate;
 
@@ -91,7 +94,10 @@ public class RobotContainer {
 
     // Commands
     // Intake Commands
-    deployIntake = new DeployIntake(intake);
+    // 30 RPM is about 0.5 rotations per second
+    deployIntake = new DeployIntake(intake, 0.1);
+    mIntakeDeploy = new MoveIntake(intake, 0.1);
+    mIntakeUndeploy = new MoveIntake(intake, -0.1);
     intakeFuel = new IntakeFuel(intake);
     agitate = new Agitate(intake);
 
@@ -248,7 +254,7 @@ public class RobotContainer {
                 () -> AllianceFlipUtil.apply(Constants.FieldConstants.hubTranslation),
                 ShotType.SCORE));
 
-    // -- Pssing Shots --
+    // -- Passing Shots --
 
     // Left Trigger + POV Left (Aim to the closest gap)
     controller
