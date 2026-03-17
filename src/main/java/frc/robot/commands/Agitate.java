@@ -10,18 +10,20 @@ import frc.robot.subsystems.intake.Intake;
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Agitate extends Command {
   private final Intake intake;
+  private final double speed;
 
   /** Creates a new Agitate. */
-  public Agitate(Intake intake) {
+  public Agitate(Intake intake, double speed) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.intake = intake;
+    this.speed = speed;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     // starts by lowering the intake
-    intake.deploy(1);
+    intake.deploy(speed);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -29,9 +31,9 @@ public class Agitate extends Command {
   public void execute() {
     double position = intake.getPosition(); // in degrees
     if (position < 5) {
-      intake.deploy(1);
+      intake.deploy(speed);
     } else if (position > 60) {
-      intake.deploy(-1);
+      intake.deploy(-speed);
     }
   }
 
@@ -39,7 +41,7 @@ public class Agitate extends Command {
   @Override
   public void end(boolean interrupted) {
     // ends by raising the intake
-    intake.deploy(-1);
+    intake.deploy(-speed);
   }
 
   // Returns true when the command should end.

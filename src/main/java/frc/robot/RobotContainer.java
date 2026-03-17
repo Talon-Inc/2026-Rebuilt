@@ -96,7 +96,7 @@ public class RobotContainer {
     mIntakeDeploy = new MoveIntake(intake, 0.1);
     mIntakeUndeploy = new MoveIntake(intake, -0.1);
     intakeFuel = new IntakeFuel(intake);
-    agitate = new Agitate(intake);
+    agitate = new Agitate(intake, 0.1);
 
     // Shooter Commands
     shootOnFly =
@@ -216,8 +216,9 @@ public class RobotContainer {
     controller.rightTrigger().whileTrue(shoot);
     // intake buttons
     controller.leftTrigger().whileTrue(intakeFuel);
-    controller.y().whileTrue(mIntakeDeploy);
-    controller.a().whileTrue(mIntakeUndeploy);
+    controller.y().whileTrue(intake.deployCommand(0.1));
+    controller.a().whileTrue(intake.deployCommand(-0.1));
+    controller.b().whileTrue(agitate);
   }
 
   /**
