@@ -91,9 +91,10 @@ public class RobotContainer {
 
     // Commands
     // Intake Commands
-    deployIntake = new DeployIntake(intake, .1);
-    mIntakeDeploy = new MoveIntake(intake, .1);
-    mIntakeUndeploy = new MoveIntake(intake, -.1);
+    // 30 RPM is about 0.5 rotations per second
+    deployIntake = new DeployIntake(intake, 0.1);
+    mIntakeDeploy = new MoveIntake(intake, 0.1);
+    mIntakeUndeploy = new MoveIntake(intake, -0.1);
     intakeFuel = new IntakeFuel(intake);
     agitate = new Agitate(intake);
 
