@@ -61,19 +61,18 @@ public final class Constants {
   public static final class FieldConstants {
     public static final double fieldLength = Units.inchesToMeters(651.22);
     public static final double fieldWidth = Units.inchesToMeters(317.69);
-    public static final Translation2d hubTranslation =
-        new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
 
     // Passing Gaps
     public static final Translation2d bluePassLeft = new Translation2d(3.0, 6.5);
 
     public static final Translation2d bluePassRight = new Translation2d(3.0, 1.5);
 
+    // Bottom left of field is (0, 0)
     public static final class Goals {
       public static final Translation2d blueHub =
           new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
       public static final Translation2d redHub =
-          new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
+          new Translation2d(fieldLength - Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
     }
   }
 }
