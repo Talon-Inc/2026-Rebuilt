@@ -24,7 +24,7 @@ public class Shoot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooter.setMotorVoltage(.25 * 12);
+    shooter.setMotorRPM(.25 * 12);
     // if (shooter.isAtSpeed()) {
     shooter.setKickerSpeed(.5);
     // }
@@ -34,7 +34,7 @@ public class Shoot extends Command {
   @Override
   public void end(boolean interrupted) {
     shooter.setKickerSpeed(0);
-    shooter.setMotorVoltage(0);
+    shooter.setMotorRPM(0);
   }
 
   // Returns true when the command should end.

@@ -6,19 +6,29 @@ package frc.robot.subsystems.shooter;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.SparkMax;
+
 import frc.robot.Configs.ShooterConfigs;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterIOReal implements ShooterIO {
-  // Kicker motor
+  // Kicker Motor
   private final SparkMax kicker;
 
-  // Motors
+  // Shooter Motors
   private final SparkFlex topMotor;
   private final SparkFlex bottomMotor;
+
+  // ClosedLoopControllers
+  private final SparkClosedLoopController topController;
+  private final SparkClosedLoopController bottomController;
 
   public ShooterIOReal() {
     // --- 1. Kicker Setup ---
@@ -36,15 +46,29 @@ public class ShooterIOReal implements ShooterIO {
 
     // Configure Motors
     topMotor.configure(
-        ShooterConfigs.leaderConfig,
+        ShooterConfigs.topConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
     // ShooterConfigs.followerConfig.follow(topMotor, true);
     bottomMotor.configure(
-        ShooterConfigs.followerConfig,
+        ShooterConfigs.bottomConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
+    
+    // --- 3. Controller Setup ---
+    topController = topMotor.getClosedLoopController();
+    bottomController = bottomMotor.getClosedLoopController();
+  }
+
+  @Override
+  public SparkBase getTopMotor() {
+    return topMotor;
+  }
+
+  @Override
+  public SparkBase getBottomMotor() {
+    return bottomMotor;
   }
 
   // -- LOGIC --
@@ -70,12 +94,31 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setTopVolts(double volts) {
-    topMotor.setVoltage(volts);
+  public void setTopRPM(double rpm) {
+    topController.setSetpoint(rpm, ControlType.kMAXMotionVelocityControl);
   }
 
   @Override
-  public void setBottomVolts(double volts) {
-    bottomMotor.setVoltage(volts);
+  public void setBottomRPM(double rpm) {
+    bottomController.setSetpoint(rpm, ControlType.kMAXMotionVelocityControl);
+  }
+
+  @Override
+  public void configurePID(
+      SparkBase motor, SparkBaseConfig config,
+      double kP, double kI, double kD, double kS, double kV, double kA) {
+    config
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+        .p(kP)
+        .i(kI)
+        .d(kD)
+        .feedForward
+        .kS(kS)
+        .kV(kV)
+        .kA(kA);
+
+    motor.configure(
+        config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 }

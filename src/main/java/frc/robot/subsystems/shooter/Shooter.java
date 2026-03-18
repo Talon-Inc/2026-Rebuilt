@@ -6,6 +6,7 @@ package frc.robot.subsystems.shooter;
 
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs.ShooterConfigs;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
@@ -14,28 +15,30 @@ public class Shooter extends SubsystemBase {
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
-  // Flywheel Controllers (These use Bang-Bang bc it's the quickest)
-  // Bang-Bang Controller: If Under speed, Full Power. If over power, 0 power
-  private final BangBangController topBang;
-  private final BangBangController bottomBang;
-
   // Setpoints
   private double targetTopRPM = 0.0;
   private double targetBottomRPM = 0.0;
   private double targetKickerRPM = 0.0;
 
   // Tunable Numbers
-  // Flywheel Power (Bang-Bang Voltage)
-  private final LoggedTunableNumber flyVolts =
-      new LoggedTunableNumber("Tuning/Shooter/FlywheelVolts", ShooterConstants.kBangBangVoltage);
+  private final LoggedTunableNumber kRPM =
+      new LoggedTunableNumber("Tuning/Shooter/kRPM", ShooterConstants.kRPM);
+  private final LoggedTunableNumber kP =
+      new LoggedTunableNumber("Tuning/Shooter/kP", ShooterConstants.kP);
+  private final LoggedTunableNumber kI =
+      new LoggedTunableNumber("Tuning/Shooter/kI", ShooterConstants.kI);
+  private final LoggedTunableNumber kD =
+      new LoggedTunableNumber("Tuning/Shooter/kD", ShooterConstants.kD);
+  private final LoggedTunableNumber kS =
+      new LoggedTunableNumber("Tuning/Shooter/kS", ShooterConstants.kS);
+  private final LoggedTunableNumber kV =
+      new LoggedTunableNumber("Tuning/Shooter/kV", ShooterConstants.kV);
+  private final LoggedTunableNumber kA =
+      new LoggedTunableNumber("Tuning/Shooter/kA", ShooterConstants.kA);
 
   /** Creates a new Shooter. */
   public Shooter(ShooterIO io) {
     this.io = io;
-
-    // Initialize Bang-Bang Controllers
-    topBang = new BangBangController(ShooterConstants.kFlywheelToleranceRPM);
-    bottomBang = new BangBangController(ShooterConstants.kFlywheelToleranceRPM);
   }
 
   @Override
@@ -47,8 +50,12 @@ public class Shooter extends SubsystemBase {
 
     // Update Tunables (This is for Live Tuning should make tuning faster)
     // Run Flywheel Logic
-    runFlywheel(topBang, inputs.topRPM, targetTopRPM, true, flyVolts.get());
-    runFlywheel(bottomBang, inputs.bottomRPM, targetBottomRPM, false, flyVolts.get());
+    runFlywheel(kRPM.get());
+
+    io.configurePID(io.getTopMotor(), ShooterConfigs.topConfig,
+        kP.get(), kI.get(), kD.get(), kS.get(), kV.get(), kA.get());
+    io.configurePID(io.getBottomMotor(), ShooterConfigs.bottomConfig,
+        kP.get(), kI.get(), kD.get(), kS.get(), kV.get(), kA.get());
 
     // Log Goals
     Logger.recordOutput("Shooter/Goal/PrimaryRPM", targetTopRPM);
@@ -56,29 +63,35 @@ public class Shooter extends SubsystemBase {
     Logger.recordOutput("Shooter/Goal/KickerRPM", targetKickerRPM);
   }
 
-  // Core Bang-Bang Logic
-  private void runFlywheel(
-      BangBangController controller,
-      double currentRPM,
-      double target,
-      boolean isTop,
-      double voltageToUse) {
-    // Only run if we actualy have a target (avoids jitter at 0 RPM)
-    if (target > 50.0) {
-      // .calculate() returns 1.0 if we need speed, 0.0 if we don't
-      double demand = controller.calculate(currentRPM, target);
-
-      // Multiply by Max Voltage (12V)
-      double volts = demand * voltageToUse;
-
-      if (isTop) io.setTopVolts(volts);
-      else io.setBottomVolts(volts);
-    } else {
-      // Idle Mode
-      if (isTop) io.setTopVolts(0.0);
-      else io.setBottomVolts(0.0);
-    }
+  // PID controlled velocity
+  private void runFlywheel(double rpm) {
+    io.setTopRPM(rpm);
+    io.setBottomRPM(rpm);
   }
+
+  // // Core Bang-Bang Logic
+  // private void runFlywheel(
+  //     BangBangController controller,
+  //     double currentRPM,
+  //     double target,
+  //     boolean isTop,
+  //     double voltageToUse) {
+  //   // Only run if we actualy have a target (avoids jitter at 0 RPM)
+  //   if (target > 50.0) {
+  //     // .calculate() returns 1.0 if we need speed, 0.0 if we don't
+  //     double demand = controller.calculate(currentRPM, target);
+
+  //     // Multiply by Max Voltage (12V)
+  //     double volts = demand * voltageToUse;
+
+  //     if (isTop) io.setTopRPM(volts);
+  //     else io.setBottomRPM(volts);
+  //   } else {
+  //     // Idle Mode
+  //     if (isTop) io.setTopRPM(0.0);
+  //     else io.setBottomRPM(0.0);
+  //   }
+  // }
 
   // --- Commands ---
 
@@ -90,9 +103,9 @@ public class Shooter extends SubsystemBase {
 
   // Sets different speeds for Top and Bottom Rollers
   // This is useful  for controlling spin (backspin/topspin)
-  public void setSplitSpeeds(double bottomRPM, double topRPM) {
-    this.targetBottomRPM = bottomRPM;
+  public void setSplitSpeeds(double topRPM, double bottomRPM) {
     this.targetTopRPM = topRPM;
+    this.targetBottomRPM = bottomRPM;
   }
 
   /**
@@ -113,8 +126,8 @@ public class Shooter extends SubsystemBase {
     io.setKickerSpeed(speed);
   }
 
-  public void setMotorVoltage(double voltage) {
-    io.setTopVolts(voltage);
-    io.setBottomVolts(voltage);
+  public void setMotorRPM(double rpm) {
+    io.setTopRPM(rpm);
+    io.setBottomRPM(rpm);
   }
 }

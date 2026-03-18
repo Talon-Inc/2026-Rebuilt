@@ -63,6 +63,20 @@ public final class Constants {
     public static final double kFlywheelToleranceRPM = 50.0;
     public static final double kMaxRPM = 5700.0;
     public static final double kBangBangVoltage = 12.0;
+    public static final double kRPM = 5000.0;
+    public static final boolean kTopInverted = false;
+
+    // PID and feed forward values, if applicable [top, bottom]
+    public static final double kP = 0.0;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+    public static final double kS = 0.0;
+    public static final double[] kV = { 0.33, 0.22 };
+    public static final double[] kA = { 0.04, 0.14 };
+
+    // MAXMotion Contants
+    public static final double kMaxAcceleration = 6000;
+    public static final double kError = 0.5;
   }
 
   public static final class FieldConstants {

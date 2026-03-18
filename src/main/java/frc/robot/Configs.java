@@ -10,6 +10,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.ShooterConstants;
 
 /** Add your docs here. */
 public final class Configs {
@@ -61,8 +62,8 @@ public final class Configs {
 
   public static final class ShooterConfigs {
     public static final SparkMaxConfig kickerConfig = new SparkMaxConfig();
-    public static final SparkFlexConfig leaderConfig = new SparkFlexConfig();
-    public static final SparkFlexConfig followerConfig = new SparkFlexConfig();
+    public static final SparkFlexConfig topConfig = new SparkFlexConfig();
+    public static final SparkFlexConfig bottomConfig = new SparkFlexConfig();
 
     static {
       // Configure basic settings of the kicker/feeder motor
@@ -72,64 +73,64 @@ public final class Configs {
           .voltageCompensation(12)
           .inverted(true);
 
-      // Configure basic settings of the leader motor
-      leaderConfig
+      // Configure basic settings of the top motor
+      topConfig
           .idleMode(IdleMode.kCoast)
           .smartCurrentLimit(60) // High current limit for Bang-Bang Recovery
           .voltageCompensation(12)
-          .inverted(false);
+          .inverted(ShooterConstants.kTopInverted);
 
-      // Configure basic settings of the follower motor
+      // Configure basic settings of the bottom motor
       // Added follow in ShooterIOReal
-      // followerConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(60).voltageCompensation(12);
-      followerConfig
+      bottomConfig
           .idleMode(IdleMode.kCoast)
           .smartCurrentLimit(60)
           .voltageCompensation(12)
-          .inverted(false);
-
-      // Configure basic settings of the kicker/feeder motor
-      kickerConfig
-          .idleMode(IdleMode.kCoast)
-          .smartCurrentLimit(60)
-          .voltageCompensation(12);
-      // .follow(primaryLeader, true);
+          .inverted(!ShooterConstants.kTopInverted);
 
       /*
        * Configure the closed loop controller. We want to make sure we set the
        * feedback sensor as the primary encoder.
        */
-      // topShooter
-      //     .closedLoop
-      //     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      //     // Set PID values for position control
-      //     .p(0.1)
-      //     .i(0)
-      //     .d(0)
-      //     .outputRange(-1, 1)
-      //     .maxMotion
-      //     // Set MAXVelocity parameters for velocity control
-      //     .maxVelocity(4200)
-      //     .maxAcceleration(6000)
-      //     .allowedClosedLoopError(0.5);
+      topConfig
+          .closedLoop
+          .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+          // Set PID values for velocity control
+          .p(ShooterConstants.kP)
+          .i(ShooterConstants.kI)
+          .d(ShooterConstants.kD)
+          .outputRange(-1, 1)
+          .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
+          .kS(ShooterConstants.kS)
+          .kV(ShooterConstants.kV)
+          .kA(ShooterConstants.kA);
+      topConfig
+          .closedLoop
+          .maxMotion // Set MAXMotion parameters for velocity control
+          .maxAcceleration(ShooterConstants.kMaxAcceleration)
+          .allowedProfileError(ShooterConstants.kError);
 
       /*
        * Configure the closed loop controller. We want to make sure we set the
        * feedback sensor as the primary encoder.
        */
-      // bottomShooter
-      //     .closedLoop
-      //     .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-      //     // Set PID values for position control
-      //     .p(0.1)
-      //     .i(0)
-      //     .d(0)
-      //     .outputRange(-1, 1)
-      //     .maxMotion
-      //     // Set MAXMotion parameters for position control
-      //     .maxVelocity(4200)
-      //     .maxAcceleration(6000)
-      //     .allowedClosedLoopError(0.5);
+      bottomConfig
+          .closedLoop
+          .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+          // Set PID values for velocity control
+          .p(ShooterConstants.kP)
+          .i(ShooterConstants.kI)
+          .d(ShooterConstants.kD)
+          .outputRange(-1, 1)
+          .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
+          .kS(ShooterConstants.kS)
+          .kV(ShooterConstants.kV)
+          .kA(ShooterConstants.kA);
+      bottomConfig
+          .closedLoop
+          .maxMotion // Set MAXMotion parameters for velocity control
+          .maxAcceleration(ShooterConstants.kMaxAcceleration)
+          .allowedProfileError(ShooterConstants.kError);
     }
   }
 }
