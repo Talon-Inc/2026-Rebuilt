@@ -55,7 +55,7 @@ public class ShootCommand extends Command {
       solution = ShootingPhysics.calculatePass(robotPose, fieldSpeeds, targetSupplier.get());
     }
 
-    shooter.setSplitSpeeds(solution.bottomRPM(), solution.topRPM());
+    shooter.setSplitSpeeds(solution.topRPM(), solution.bottomRPM());
 
     // This is so it only feeds the ball when the flywheels are ready
     if (shooter.isAtSpeed()) {

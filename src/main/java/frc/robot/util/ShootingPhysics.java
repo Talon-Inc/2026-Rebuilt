@@ -39,11 +39,11 @@ public class ShootingPhysics {
     timeOfFlightMap.put(1.0, .2);
     timeOfFlightMap.put(5.0, 1.0);
 
-    // Key: Distance(m), Value:RPM
+    // Key: Distance(m), Value: RPM
     bottomRPMMap.put(1.0, 2000.0);
     bottomRPMMap.put(5.0, 4000.0);
 
-    // Key: Distance(m), Value:RPM
+    // Key: Distance(m), Value: RPM
     topRPMMap.put(1.0, 2000.0);
     topRPMMap.put(5.0, 4000.0);
 
