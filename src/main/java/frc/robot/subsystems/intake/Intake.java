@@ -24,8 +24,8 @@ public class Intake extends SubsystemBase {
   private final SparkMax intakeMotor;
   private final AbsoluteEncoder encoder;
   private final SparkClosedLoopController deployController;
-  private double lowerLimit;
-  private double upperLimit;
+  private double lowerLimit; // lower rotation limit
+  private double upperLimit; // upper rotation limit
 
   // Tunable Numbers
   private final LoggedTunableNumber kPIntake =
@@ -55,14 +55,15 @@ public class Intake extends SubsystemBase {
     upperLimit = 85; // about 85 degress to end
   }
 
-  private void updatePID() {
-    IntakeConfigs.deployConfig
+  private void configurePID() {
+    IntakeConfigs
+        .deployConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
         .p(kPIntake.get())
         .i(kIIntake.get())
         .d(kDIntake.get())
-        .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
+        .feedForward
         .kS(kSIntake.get())
         .kV(kVIntake.get());
 
@@ -77,7 +78,6 @@ public class Intake extends SubsystemBase {
    * @param speed Speed in RPM
    */
   public void deploy(double speed) {
-    updatePID();
     deployController.setSetpoint(speed, ControlType.kVelocity);
   }
 
@@ -130,5 +130,7 @@ public class Intake extends SubsystemBase {
     if (currentPos < lowerLimit || currentPos > upperLimit) {
       stopDeploy();
     }
+    
+    configurePID();
   }
 }
