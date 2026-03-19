@@ -30,7 +30,7 @@ public final class Configs {
       // and its absolute encoder
       deployConfig
           .idleMode(IdleMode.kBrake)
-          .smartCurrentLimit(50)
+          .smartCurrentLimit(60)
           .voltageCompensation(12)
           .inverted(false);
       deployConfig

@@ -39,7 +39,7 @@ public final class Constants {
     // Intake motor confugurations
     public static final int kDeployMotorId = 11;
     public static final int kIntakeMotorId = 12;
-    public static final double kP = 0.0;
+    public static final double kP = 0.002;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
     public static final double kS = 0.0;
