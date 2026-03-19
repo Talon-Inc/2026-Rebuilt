@@ -39,11 +39,11 @@ public final class Constants {
     // Intake motor confugurations
     public static final int kDeployMotorId = 11;
     public static final int kIntakeMotorId = 12;
-    public static final double kP = 3.0;
+    public static final double kP = 0.0;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
     public static final double kS = 0.0;
-    public static final double kV = 0.01;
+    public static final double kV = 0.0;
   }
 
   public static final class ShooterConstants {
@@ -77,7 +77,8 @@ public final class Constants {
       public static final Translation2d blueHub =
           new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
       public static final Translation2d redHub =
-          new Translation2d(fieldLength - Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
+          new Translation2d(
+              fieldLength - Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
     }
   }
 }

@@ -4,131 +4,166 @@
 
 package frc.robot.subsystems.intake;
 
-import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Configs.IntakeConfigs;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.util.LoggedTunableNumber;
+import org.littletonrobotics.junction.Logger;
 
 public class Intake extends SubsystemBase {
-  private final SparkMax deployMotor;
-  private final SparkMax intakeMotor;
-  private final AbsoluteEncoder encoder;
-  private final SparkClosedLoopController deployController;
-  private double lowerLimit;
-  private double upperLimit;
+  private final IntakeIO io;
+  private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
-  // Tunable Numbers
-  private final LoggedTunableNumber kPIntake =
+  // STATE MACHINE (Yes, I added this, it improves so much, I'll tell in person)
+  public enum IntakeState {
+    STOW, // Up, Roller is off
+    INTAKE, // Down, Spinning in
+    EJECT, // Down, Spinning out
+    AGITATE, // Smart Agittation
+    PREP // This will wait in position, rollers off (Sepcifically for ShootComand)
+  }
+
+  private IntakeState currentState = IntakeState.STOW;
+
+  // Agitating memory
+  private boolean agitateMovingDown = true;
+  private double currentTargetAngle = 5.0; // This tracks where the arm is currently trying to go
+
+  // Something I got from 6328: This waits .1 seconds to ensure the arm has stopped bouncing
+  private final Debouncer atGoalDebouncer = new Debouncer(0.1, DebounceType.kRising);
+  private boolean isStableAtGoal = false;
+
+  // So if we hit an obstruction when trying to Stow it doesn't jitter
+  private boolean hitObstruction = false;
+  private double restingAngle = 5.0;
+
+  // Tuanable Numbers (For Deployment)
+  private final LoggedTunableNumber kP =
       new LoggedTunableNumber("Tuning/Intake/kP", IntakeConstants.kP);
-  private final LoggedTunableNumber kIIntake =
+  private final LoggedTunableNumber kI =
       new LoggedTunableNumber("Tuning/Intake/kI", IntakeConstants.kI);
-  private final LoggedTunableNumber kDIntake =
+  private final LoggedTunableNumber kD =
       new LoggedTunableNumber("Tuning/Intake/kD", IntakeConstants.kD);
-  private final LoggedTunableNumber kSIntake =
+  private final LoggedTunableNumber kS =
       new LoggedTunableNumber("Tuning/Intake/kS", IntakeConstants.kS);
-  private final LoggedTunableNumber kVIntake =
+  private final LoggedTunableNumber kV =
       new LoggedTunableNumber("Tuning/Intake/kV", IntakeConstants.kV);
+  private final LoggedTunableNumber kG = new LoggedTunableNumber("Tuning/Intake/kG", 0.0);
 
-  /** Creates a new Intake. */
-  public Intake() {
-    deployMotor = new SparkMax(IntakeConstants.kDeployMotorId, MotorType.kBrushless);
-    intakeMotor = new SparkMax(IntakeConstants.kIntakeMotorId, MotorType.kBrushless);
-    encoder = deployMotor.getAbsoluteEncoder();
-    deployController = deployMotor.getClosedLoopController();
+  // Tunable Numbers (For Roller)
+  private final LoggedTunableNumber intakeVolts =
+      new LoggedTunableNumber(
+          "Tuning/Intake/RollerIntakeVolts", 4.0); // Just to start low since .5 went crazy
+  private final LoggedTunableNumber feedVolts =
+      new LoggedTunableNumber("Tuning/Intake/RollerFeedVolts", 6.0);
+  private final LoggedTunableNumber ejectVolts =
+      new LoggedTunableNumber("Tuning/Intake/RollerEjectVolts", -6.0);
 
-    deployMotor.configure(
-        IntakeConfigs.deployConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    intakeMotor.configure(
-        IntakeConfigs.intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-
-    lowerLimit = 5; // about 5 degrees to start
-    upperLimit = 85; // about 85 degress to end
+  public Intake(IntakeIO io) {
+    this.io = io;
   }
 
-  private void updatePID() {
-    IntakeConfigs.deployConfig
-        .closedLoop
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-        .p(kPIntake.get())
-        .i(kIIntake.get())
-        .d(kDIntake.get())
-        .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
-        .kS(kSIntake.get())
-        .kV(kVIntake.get());
-
-    deployMotor.configure(
-        IntakeConfigs.deployConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+  public void setState(IntakeState state) {
+    // If we are leaving stow, forget the obstruction so it can move again freely
+    if (state != IntakeState.STOW) {
+      hitObstruction = false;
+    }
+    this.currentState = state;
   }
 
-  /**
-   * Used to lower and raise intake
-   * "+" lowers and "-" raises
-   * 
-   * @param speed Speed in RPM
-   */
-  public void deploy(double speed) {
-    updatePID();
-    deployController.setSetpoint(speed, ControlType.kVelocity);
+  public IntakeState getState() {
+    return currentState;
   }
 
-  /**
-   * Creates a Command using deploy()
-   * 
-   * @param speed Speed in RPM
-   */
-  public Command deployCommand(double speed) {
-    return runOnce(() -> deploy(speed));
-  }
-
-  // used to run the intake rollers
-  // "+" pulls balls in and "-" pushes them out
-  public void runIntake(double speed) {
-    intakeMotor.set(speed);
-  }
-
-  public void stopDeploy() {
-    deployMotor.stopMotor();
-  }
-
-  public void stopIntake() {
-    intakeMotor.stopMotor();
-  }
-
-  // Get angle of the deploy arm
-  public double getPosition() {
-    return encoder.getPosition();
-  }
-
-  // Check if intake motor is running
-  public boolean isIntakeRunning() {
-    return Math.abs(intakeMotor.getEncoder().getVelocity()) > 0.1;
-  }
-
-  // Set minimum angle for deploy
-  public void setLowerLimit(double limit) {
-    this.lowerLimit = limit;
-  }
-
-  // Set maximum angle for deploy
-  public void setUpperLimit(double limit) {
-    this.upperLimit = limit;
+  // Checks if the arm is done moving
+  public boolean isStable() {
+    return isStableAtGoal;
   }
 
   @Override
   public void periodic() {
-    double currentPos = encoder.getPosition(); // in degrees
-    if (currentPos < lowerLimit || currentPos > upperLimit) {
-      stopDeploy();
+    io.updateInputs(inputs);
+    Logger.processInputs("Intake", inputs);
+    Logger.recordOutput("Intake/State", currentState.toString());
+
+    // Update PID only if we change it in Advantage Scope
+    if (kP.hasChanged()
+        || kI.hasChanged()
+        || kD.hasChanged()
+        || kS.hasChanged()
+        || kV.hasChanged()) {
+      io.updatePID(kP.get(), kI.get(), kD.get(), kS.get(), kV.get());
     }
+
+    // Calculate the voltage for Gravity (kG * cos(angle))
+    double gravityVoltage = kG.get() * Math.cos(Math.toRadians(inputs.deployAngleDeg));
+
+    // Run the STATE MACHINE
+    switch (currentState) {
+      case STOW:
+        double stowAmps = inputs.deployAmps.length > 0 ? inputs.deployAmps[0] : 0.0;
+
+        // if we hit a spike for the first time, hold position
+        if (stowAmps > 20.0 && !hitObstruction) {
+          hitObstruction = true;
+          restingAngle = inputs.deployAngleDeg;
+        }
+
+        // if obstructed, hold the resiting angle forever. if not then go to 5.0
+        currentTargetAngle = hitObstruction ? restingAngle :  5.0;
+        io.setDeployPosition(currentTargetAngle, gravityVoltage);
+        io.setRollerVoltage(0.0);
+        break;
+
+      case PREP:
+        currentTargetAngle = 45.0;
+        io.setDeployPosition(currentTargetAngle, gravityVoltage);
+        io.setRollerVoltage(0.0);
+        break;
+
+      case INTAKE:
+        currentTargetAngle = 85.0;
+        io.setDeployPosition(currentTargetAngle, gravityVoltage);
+        io.setRollerVoltage(intakeVolts.get());
+        break;
+
+      case EJECT:
+        currentTargetAngle = 85.0;
+        io.setDeployPosition(currentTargetAngle, gravityVoltage);
+        io.setRollerVoltage(ejectVolts.get());
+        break;
+
+      case AGITATE:
+        // Keep rollers feeding the kciker (we can change this if it causes problems)
+        io.setRollerVoltage(feedVolts.get());
+
+        // By readinng the current draw of the motor we get a feel for resistance
+        double currentAmps = inputs.deployAmps.length > 0 ? inputs.deployAmps[0] : 0.0;
+
+        // If we hit a jam (>20A [THIS CAN CHANGE]), then we intstantly reverse direction
+        if (currentAmps > 20.0) {
+          agitateMovingDown = !agitateMovingDown;
+        }
+
+        // LIMITS: Reverse direction if we hit our upper or lower bounds
+        if (inputs.deployAngleDeg >= 45.0) {
+          agitateMovingDown = false; // Go up
+        } else if (inputs.deployAngleDeg <= 5.0) {
+          agitateMovingDown = true; // Go down
+        }
+
+        // What makes it move
+        currentTargetAngle = agitateMovingDown ? 45.0 : 5.0;
+        io.setDeployPosition(currentTargetAngle, gravityVoltage);
+        break;
+    }
+
+    Logger.recordOutput("Intake/TargetAngleDeg", currentTargetAngle);
+
+    // Check if we are within 3 degrees of the target
+    boolean atAngle = Math.abs(inputs.deployAngleDeg - currentTargetAngle) <= 3.0;
+    isStableAtGoal = atGoalDebouncer.calculate(atAngle);
+    Logger.recordOutput("Intake/IsStable", isStableAtGoal);
   }
 }

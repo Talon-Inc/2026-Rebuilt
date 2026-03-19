@@ -19,12 +19,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.Agitate;
-import frc.robot.commands.DeployIntake;
 import frc.robot.commands.DriveAimSOTF;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.IntakeFuel;
-import frc.robot.commands.MoveIntake;
 import frc.robot.commands.Shoot;
 import frc.robot.commands.ShootCommand;
 import frc.robot.subsystems.LED;
@@ -32,6 +28,8 @@ import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIONavX;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.Intake.IntakeState;
+import frc.robot.subsystems.intake.IntakeIOReal;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.vision.Vision;
@@ -56,11 +54,6 @@ public class RobotContainer {
 
   // Commands
   // Intake Commands
-  private final DeployIntake deployIntake;
-  private final MoveIntake mIntakeDeploy;
-  private final MoveIntake mIntakeUndeploy;
-  private final IntakeFuel intakeFuel;
-  private final Agitate agitate;
 
   // Shooter Commands
   private final Shoot shoot;
@@ -74,7 +67,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Subsystems
-    intake = new Intake();
+    intake = new Intake(new IntakeIOReal());
     shooter = new Shooter(new ShooterIOReal());
     led = new LED();
 
@@ -95,11 +88,6 @@ public class RobotContainer {
     // Commands
     // Intake Commands
     // 30 RPM is about 0.5 rotations per second
-    deployIntake = new DeployIntake(intake, 0.1);
-    mIntakeDeploy = new MoveIntake(intake, 0.1);
-    mIntakeUndeploy = new MoveIntake(intake, -0.1);
-    intakeFuel = new IntakeFuel(intake);
-    agitate = new Agitate(intake);
 
     // Shooter Commands
 
@@ -228,8 +216,13 @@ public class RobotContainer {
     //                 intake.stopIntake()));
     // Shooter Buttons
     // controller.rightTrigger(.5).whileTrue(shoot);
-    // intake buttons
-    controller.L1().whileTrue(intakeFuel);
+
+    // --INTAKE--
+    // Hold L1 to intake and when you release it automatically Stows
+    controller
+        .L1()
+        .onTrue(Commands.runOnce(() -> intake.setState(IntakeState.INTAKE)))
+        .onFalse(Commands.runOnce(() -> intake.setState(IntakeState.STOW)));
 
     // -- DEFAULT Scoring Buttons --
 
@@ -239,7 +232,7 @@ public class RobotContainer {
         .whileTrue(
             new DriveAimSOTF(
                 drive,
-                () -> AllianceFlipUtil.apply(Constants.FieldConstants.hubTranslation),
+                () -> AllianceFlipUtil.apply(Constants.FieldConstants.Goals.blueHub),
                 () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
                 ShotType.SCORE));
@@ -251,14 +244,15 @@ public class RobotContainer {
             new ShootCommand(
                 shooter,
                 drive,
-                () -> AllianceFlipUtil.apply(Constants.FieldConstants.hubTranslation),
+                intake,
+                () -> AllianceFlipUtil.apply(Constants.FieldConstants.Goals.blueHub),
                 ShotType.SCORE));
 
     // -- Passing Shots --
 
     // Left Trigger + POV Left (Aim to the closest gap)
     controller
-        .L1()
+        .L2()
         .and(controller.povLeft())
         .whileTrue(
             new DriveAimSOTF(
@@ -272,7 +266,8 @@ public class RobotContainer {
     controller
         .R1()
         .and(controller.povLeft())
-        .whileTrue(new ShootCommand(shooter, drive, () -> getSmartPassTarget(), ShotType.PASS));
+        .whileTrue(
+            new ShootCommand(shooter, drive, intake, () -> getSmartPassTarget(), ShotType.PASS));
   }
 
   /**

@@ -9,6 +9,8 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.Intake.IntakeState;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.util.ShootingPhysics;
 import frc.robot.util.ShootingPhysics.ShotType;
@@ -18,18 +20,21 @@ import java.util.function.Supplier;
 public class ShootCommand extends Command {
   private final Shooter shooter;
   private final Drive drive;
+  private final Intake intake;
   private final Supplier<Translation2d> targetSupplier;
   private final ShootingPhysics.ShotType shotType;
 
   /** Creates a new ShootCommand. */
-  public ShootCommand(Shooter shooter, Drive drive, Supplier<Translation2d> target, ShotType type) {
+  public ShootCommand(
+      Shooter shooter, Drive drive, Intake intake, Supplier<Translation2d> target, ShotType type) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.shooter = shooter;
     this.drive = drive;
+    this.intake = intake;
     this.targetSupplier = target;
     this.shotType = type;
 
-    addRequirements(shooter);
+    addRequirements(shooter, intake);
   }
 
   // Called when the command is initially scheduled.
@@ -55,8 +60,10 @@ public class ShootCommand extends Command {
     // This is so it only feeds the ball when the flywheels are ready
     if (shooter.isAtSpeed()) {
       shooter.setKickerSpeed(0.5);
+      intake.setState(IntakeState.AGITATE);
     } else {
       shooter.setKickerSpeed(0.0);
+      intake.setState(IntakeState.PREP);
     }
   }
 
@@ -65,6 +72,7 @@ public class ShootCommand extends Command {
   public void end(boolean interrupted) {
     shooter.setTargetSpeed(0);
     shooter.setKickerSpeed(0);
+    intake.setState(IntakeState.STOW);
   }
 
   // Returns true when the command should end.

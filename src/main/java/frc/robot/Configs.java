@@ -8,7 +8,6 @@ import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
 import frc.robot.Constants.IntakeConstants;
 
 /** Add your docs here. */
@@ -89,10 +88,7 @@ public final class Configs {
           .inverted(false);
 
       // Configure basic settings of the kicker/feeder motor
-      kickerConfig
-          .idleMode(IdleMode.kCoast)
-          .smartCurrentLimit(60)
-          .voltageCompensation(12);
+      kickerConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(60).voltageCompensation(12);
       // .follow(primaryLeader, true);
 
       /*
