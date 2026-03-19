@@ -55,9 +55,8 @@ public class Intake extends SubsystemBase {
     upperLimit = 85; // about 85 degress to end
   }
 
-  private void configurePID() {
-    IntakeConfigs
-        .deployConfig
+  private void updatePID() {
+    IntakeConfigs.deployConfig
         .closedLoop
         .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
         .p(kPIntake.get())
@@ -131,6 +130,6 @@ public class Intake extends SubsystemBase {
       stopDeploy();
     }
     
-    configurePID();
+    updatePID();
   }
 }
