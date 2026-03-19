@@ -60,10 +60,14 @@ public class ShootCommand extends Command {
     // This is so it only feeds the ball when the flywheels are ready
     if (shooter.isAtSpeed()) {
       shooter.setKickerSpeed(0.5);
-      intake.setState(IntakeState.AGITATE);
+      if (intake.getState() != IntakeState.AGITATE) {
+        intake.setState(IntakeState.AGITATE);
+      }
     } else {
       shooter.setKickerSpeed(0.0);
-      intake.setState(IntakeState.PREP);
+      if (intake.getState() != IntakeState.PREP) {
+        intake.setState(IntakeState.PREP);
+      }
     }
   }
 

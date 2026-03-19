@@ -38,6 +38,8 @@ public class Intake extends SubsystemBase {
   private boolean hitObstruction = false;
   private double restingAngle = 5.0;
 
+  private int agitateCooldownLoops = 0;
+
   // Tuanable Numbers (For Deployment)
   private final LoggedTunableNumber kP =
       new LoggedTunableNumber("Tuning/Intake/kP", IntakeConstants.kP);
@@ -142,8 +144,11 @@ public class Intake extends SubsystemBase {
         double currentAmps = inputs.deployAmps.length > 0 ? inputs.deployAmps[0] : 0.0;
 
         // If we hit a jam (>20A [THIS CAN CHANGE]), then we intstantly reverse direction
-        if (currentAmps > 20.0) {
+        if (agitateCooldownLoops > 0) {
+          agitateCooldownLoops--;
+        } else if (currentAmps > 20.0) {
           agitateMovingDown = !agitateMovingDown;
+          agitateCooldownLoops = 25;
         }
 
         // LIMITS: Reverse direction if we hit our upper or lower bounds
