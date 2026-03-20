@@ -25,6 +25,7 @@ public class Shoot extends Command {
   @Override
   public void execute() {
     shooter.setMotorVoltage(.25 * 12);
+    // shooter.setSplitSpeeds(3000, 3000);
     // if (shooter.isAtSpeed()) {
     shooter.setKickerSpeed(.5);
     // }

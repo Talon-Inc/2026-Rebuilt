@@ -64,7 +64,7 @@ public class ShootCommand extends Command {
         intake.setState(IntakeState.AGITATE);
       }
     } else {
-      shooter.setKickerSpeed(0.0);
+      shooter.setKickerSpeed(0.5);
       if (intake.getState() != IntakeState.PREP) {
         intake.setState(IntakeState.PREP);
       }

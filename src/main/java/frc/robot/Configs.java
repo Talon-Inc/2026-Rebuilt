@@ -80,12 +80,11 @@ public final class Configs {
 
       // Configure basic settings of the follower motor
       // Added follow in ShooterIOReal
-      // followerConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(60).voltageCompensation(12);
       followerConfig
           .idleMode(IdleMode.kCoast)
           .smartCurrentLimit(60)
           .voltageCompensation(12)
-          .inverted(false);
+          .inverted(true);
 
       // Configure basic settings of the kicker/feeder motor
       kickerConfig.idleMode(IdleMode.kCoast).smartCurrentLimit(60).voltageCompensation(12);

@@ -55,8 +55,7 @@ public class Intake extends SubsystemBase {
 
   // Tunable Numbers (For Roller)
   private final LoggedTunableNumber intakeVolts =
-      new LoggedTunableNumber(
-          "Tuning/Intake/RollerIntakeVolts", 4.0); // Just to start low since .5 went crazy
+      new LoggedTunableNumber("Tuning/Intake/RollerIntakeVolts", 8.0);
   private final LoggedTunableNumber feedVolts =
       new LoggedTunableNumber("Tuning/Intake/RollerFeedVolts", 6.0);
   private final LoggedTunableNumber ejectVolts =
@@ -137,7 +136,7 @@ public class Intake extends SubsystemBase {
         break;
 
       case AGITATE:
-        // Keep rollers feeding the kciker (we can change this if it causes problems)
+        // Keep rollers feeding the kicker (we can change this if it causes problems)
         io.setRollerVoltage(feedVolts.get());
 
         // By readinng the current draw of the motor we get a feel for resistance
