@@ -92,12 +92,12 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void setTopRPM(double rpm) {
-    topController.setSetpoint(rpm, ControlType.kMAXMotionVelocityControl);
+    topController.setSetpoint(rpm, ControlType.kVelocity);
   }
 
   @Override
   public void setBottomRPM(double rpm) {
-    bottomController.setSetpoint(rpm, ControlType.kMAXMotionVelocityControl);
+    bottomController.setSetpoint(rpm, ControlType.kVelocity);
   }
 
   @Override
@@ -108,19 +108,17 @@ public class ShooterIOReal implements ShooterIO {
       double kI,
       double kD,
       double kS,
-      double kV,
-      double kA) {
+      double kV) {
     config
         .closedLoop
-        .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .p(kP)
         .i(kI)
         .d(kD)
         .feedForward
         .kS(kS)
-        .kV(kV)
-        .kA(kA);
+        .kV(kV);
 
-    motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
   }
 }

@@ -49,6 +49,5 @@ public interface ShooterIO {
       double kI,
       double kD,
       double kS,
-      double kV,
-      double kA) {}
+      double kV) {}
 }

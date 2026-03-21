@@ -101,13 +101,12 @@ public final class Configs {
           .outputRange(-1, 1)
           .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
           .kS(ShooterConstants.kS)
-          .kV(ShooterConstants.kV[0])
-          .kA(ShooterConstants.kA[0]);
-      topConfig
-          .closedLoop
-          .maxMotion // Set MAXMotion parameters for velocity control
-          .maxAcceleration(ShooterConstants.kMaxAcceleration)
-          .allowedProfileError(ShooterConstants.kError);
+          .kV(ShooterConstants.kV[0]);
+      // topConfig
+      //     .closedLoop
+      //     .maxMotion // Set MAXMotion parameters for velocity control
+      //     .maxAcceleration(ShooterConstants.kMaxAcceleration)
+      //     .allowedProfileError(ShooterConstants.kError);
 
       /*
        * Configure the closed loop controller. We want to make sure we set the
@@ -123,13 +122,12 @@ public final class Configs {
           .outputRange(-1, 1)
           .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
           .kS(ShooterConstants.kS)
-          .kV(ShooterConstants.kV[1])
-          .kA(ShooterConstants.kA[1]);
-      bottomConfig
-          .closedLoop
-          .maxMotion // Set MAXMotion parameters for velocity control
-          .maxAcceleration(ShooterConstants.kMaxAcceleration)
-          .allowedProfileError(ShooterConstants.kError);
+          .kV(ShooterConstants.kV[1]);
+      // bottomConfig
+      //     .closedLoop
+      //     .maxMotion // Set MAXMotion parameters for velocity control
+      //     .maxAcceleration(ShooterConstants.kMaxAcceleration)
+      //     .allowedProfileError(ShooterConstants.kError);
     }
   }
 }

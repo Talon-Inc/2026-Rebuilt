@@ -70,7 +70,6 @@ public final class Constants {
     public static final double kD = 0.0;
     public static final double kS = 0.0;
     public static final double[] kV = {0.33, 0.22};
-    public static final double[] kA = {0.04, 0.14};
 
     // MAXMotion Contants
     public static final double kMaxAcceleration = 6000;

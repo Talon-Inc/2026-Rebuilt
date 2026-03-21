@@ -34,11 +34,6 @@ public class Shooter extends SubsystemBase {
       new LoggedTunableNumber("/Tuning/Shooter/kV", ShooterConstants.kV[0]);
   private final LoggedTunableNumber kVBottom =
       new LoggedTunableNumber("/Tuning/Shooter/kV", ShooterConstants.kV[1]);
-  private final LoggedTunableNumber kATop =
-      new LoggedTunableNumber("/Tuning/Shooter/kA", ShooterConstants.kA[0]);
-  private final LoggedTunableNumber kABottom =
-      new LoggedTunableNumber("/Tuning/Shooter/kA", ShooterConstants.kA[1]);
-
   /** Creates a new Shooter. */
   public Shooter(ShooterIO io) {
     this.io = io;
@@ -52,27 +47,14 @@ public class Shooter extends SubsystemBase {
     Logger.processInputs("Shooter", inputs);
 
     // Update Tunables (This is for Live Tuning should make tuning faster)
-    // Run Flywheel Logic
-    runFlywheel(kRPM.get());
-
-    io.configurePID(
-        io.getTopMotor(),
-        ShooterConfigs.topConfig,
-        kP.get(),
-        kI.get(),
-        kD.get(),
-        kS.get(),
-        kVTop.get(),
-        kATop.get());
-    io.configurePID(
-        io.getBottomMotor(),
-        ShooterConfigs.bottomConfig,
-        kP.get(),
-        kI.get(),
-        kD.get(),
-        kS.get(),
-        kVBottom.get(),
-        kABottom.get());
+    if (kP.hasChanged() || kI.hasChanged() || kD.hasChanged() || kS.hasChanged() ||
+    kVTop.hasChanged() || kVBottom.hasChanged()) {
+      io.configurePID(io.getTopMotor(), ShooterConfigs.topConfig, kP.get(), kI.get(), kD.get(), kS.get(), kVTop.get());
+      io.configurePID(io.getBottomMotor(), ShooterConfigs.topConfig, kP.get(), kI.get(), kD.get(), kS.get(), kVBottom.get());
+    }
+    
+    io.setTopRPM(targetTopRPM);
+    io.setBottomRPM(targetBottomRPM);
 
     // Log Goals
     Logger.recordOutput("Shooter/Goal/PrimaryRPM", targetTopRPM);
@@ -121,8 +103,6 @@ public class Shooter extends SubsystemBase {
   // Sets different speeds for Top and Bottom Rollers
   // This is useful  for controlling spin (backspin/topspin)
   public void setSplitSpeeds(double topRPM, double bottomRPM) {
-    io.setTopRPM(topRPM);
-    io.setBottomRPM(bottomRPM);
     this.targetTopRPM = topRPM;
     this.targetBottomRPM = bottomRPM;
   }
@@ -146,7 +126,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public void setMotorRPM(double rpm) {
-    io.setTopRPM(rpm);
-    io.setBottomRPM(rpm);
+    this.targetTopRPM = rpm;
+    this.targetBottomRPM = rpm;
   }
 }
