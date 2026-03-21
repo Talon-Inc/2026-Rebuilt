@@ -12,9 +12,8 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.SparkMax;
-
+import com.revrobotics.spark.config.SparkBaseConfig;
 import frc.robot.Configs.ShooterConfigs;
 import frc.robot.Constants.ShooterConstants;
 
@@ -46,16 +45,14 @@ public class ShooterIOReal implements ShooterIO {
 
     // Configure Motors
     topMotor.configure(
-        ShooterConfigs.topConfig,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
+        ShooterConfigs.topConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     // ShooterConfigs.followerConfig.follow(topMotor, true);
     bottomMotor.configure(
         ShooterConfigs.bottomConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
-    
+
     // --- 3. Controller Setup ---
     topController = topMotor.getClosedLoopController();
     bottomController = bottomMotor.getClosedLoopController();
@@ -105,8 +102,14 @@ public class ShooterIOReal implements ShooterIO {
 
   @Override
   public void configurePID(
-      SparkBase motor, SparkBaseConfig config,
-      double kP, double kI, double kD, double kS, double kV, double kA) {
+      SparkBase motor,
+      SparkBaseConfig config,
+      double kP,
+      double kI,
+      double kD,
+      double kS,
+      double kV,
+      double kA) {
     config
         .closedLoop
         .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
@@ -118,7 +121,6 @@ public class ShooterIOReal implements ShooterIO {
         .kV(kV)
         .kA(kA);
 
-    motor.configure(
-        config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    motor.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 }

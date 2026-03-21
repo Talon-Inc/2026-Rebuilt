@@ -10,6 +10,7 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -52,12 +53,6 @@ public class RobotContainer {
   private final Vision vision;
   private final LED led;
 
-  // Commands
-  // Intake Commands
-
-  // Shooter Commands
-  private final Shoot shoot;
-
   // Controller
   private final CommandPS5Controller controller = new CommandPS5Controller(0);
 
@@ -85,13 +80,6 @@ public class RobotContainer {
             new VisionIOPhotonVision(camera0Name, robotToCamera0),
             new VisionIOPhotonVision(camera1Name, robotToCamera1));
 
-    // Commands
-    // Intake Commands
-    // 30 RPM is about 0.5 rotations per second
-
-    // Shooter Commands
-
-    shoot = new Shoot(shooter);
     // switch (Constants.currentMode) {
     //   case REAL:
     //     // Real robot, instantiate hardware IO implementations
@@ -127,6 +115,27 @@ public class RobotContainer {
     //     break;
     // }
 
+    // Setup Commands for Pahtplanner
+    NamedCommands.registerCommand(
+        "Intake", Commands.runOnce(() -> intake.setState(IntakeState.INTAKE)));
+    NamedCommands.registerCommand(
+        "Stow", Commands.runOnce(() -> intake.setState(IntakeState.STOW)));
+    NamedCommands.registerCommand(
+        "AutoShoot",
+        new ShootCommand(
+            shooter,
+            drive,
+            intake,
+            () -> AllianceFlipUtil.apply(Constants.FieldConstants.Goals.blueHub),
+            ShotType.SCORE));
+    NamedCommands.registerCommand(
+        "AlignRotation",
+        new DriveAimSOTF(
+            drive,
+            () -> AllianceFlipUtil.apply(Constants.FieldConstants.Goals.blueHub),
+            () -> -controller.getLeftX(),
+            () -> -controller.getLeftY(),
+            ShotType.SCORE));
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -219,10 +228,21 @@ public class RobotContainer {
 
     // --INTAKE--
     // Hold L1 to intake and when you release it automatically Stows
+    // controller
+    //     .povDown()
+    //     .onTrue(Commands.runOnce(() -> intake.setState(IntakeState.INTAKE)))
+    //     .onFalse(Commands.runOnce(() -> intake.setState(IntakeState.STOW)));
     controller
-        .L1()
-        .onTrue(Commands.runOnce(() -> intake.setState(IntakeState.INTAKE)))
-        .onFalse(Commands.runOnce(() -> intake.setState(IntakeState.STOW)));
+        .povDown()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  if (intake.getState() == IntakeState.INTAKE) {
+                    intake.setState(IntakeState.STOW);
+                  } else {
+                    intake.setState(IntakeState.INTAKE);
+                  }
+                }));
 
     // -- DEFAULT Scoring Buttons --
 
@@ -233,13 +253,13 @@ public class RobotContainer {
             new DriveAimSOTF(
                 drive,
                 () -> AllianceFlipUtil.apply(Constants.FieldConstants.Goals.blueHub),
-                () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
+                () -> -controller.getLeftY(),
                 ShotType.SCORE));
 
     // Right Bumper: Fire to Score
     controller
-        .R1()
+        .R2()
         .whileTrue(
             new ShootCommand(
                 shooter,
@@ -258,16 +278,18 @@ public class RobotContainer {
             new DriveAimSOTF(
                 drive,
                 () -> getSmartPassTarget(),
-                () -> -controller.getLeftY(),
                 () -> -controller.getLeftX(),
+                () -> -controller.getLeftY(),
                 ShotType.PASS));
 
     // Right Bumper + POV Left (Fire to Pass)
     controller
-        .R1()
+        .R2()
         .and(controller.povLeft())
         .whileTrue(
             new ShootCommand(shooter, drive, intake, () -> getSmartPassTarget(), ShotType.PASS));
+
+    controller.R1().whileTrue(new Shoot(shooter));
   }
 
   /**

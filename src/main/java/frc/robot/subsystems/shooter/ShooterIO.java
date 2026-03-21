@@ -4,10 +4,9 @@
 
 package frc.robot.subsystems.shooter;
 
-import org.littletonrobotics.junction.AutoLog;
-
 import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.config.SparkBaseConfig;
+import org.littletonrobotics.junction.AutoLog;
 
 public interface ShooterIO {
   @AutoLog
@@ -34,7 +33,7 @@ public interface ShooterIO {
   // Updates the set of loggable inputs
   public default void updateInputs(ShooterIOInputs inputs) {}
 
-  // Run the kicker (Volts)
+  // Run the kicker (Speed)
   public default void setKickerSpeed(double speed) {}
 
   // Run the shooters (RPM)
@@ -44,6 +43,12 @@ public interface ShooterIO {
 
   // Configure PID Constants (Optional if tuning via Advantage Scope)
   public default void configurePID(
-      SparkBase motor, SparkBaseConfig config,
-      double kP, double kI, double kD, double kS, double kV, double kA) {}
+      SparkBase motor,
+      SparkBaseConfig config,
+      double kP,
+      double kI,
+      double kD,
+      double kS,
+      double kV,
+      double kA) {}
 }

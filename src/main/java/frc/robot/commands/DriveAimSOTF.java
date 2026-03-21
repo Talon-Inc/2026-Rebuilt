@@ -30,11 +30,11 @@ public class DriveAimSOTF extends Command {
 
   // Tunable Numbers
   private static final LoggedTunableNumber turnkP =
-      new LoggedTunableNumber("Tuning/DriveAim/kP", 5.0);
+      new LoggedTunableNumber("/Tuning/DriveAim/kP", 5.0);
   private static final LoggedTunableNumber turnKi =
-      new LoggedTunableNumber("Tuning/DriveAim/kI", 0.0);
+      new LoggedTunableNumber("/Tuning/DriveAim/kI", 0.0);
   private static final LoggedTunableNumber turnKd =
-      new LoggedTunableNumber("Tuning/DriveAim/kD", 0.0);
+      new LoggedTunableNumber("/Tuning/DriveAim/kD", 0.0);
 
   private static final LoggedTunableNumber speedLimit =
       new LoggedTunableNumber("Tuning/DriveAim/MaxSpeed", 4.5);

@@ -6,10 +6,15 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.shooter.Shooter;
+import frc.robot.util.LoggedTunableNumber;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Shoot extends Command {
   private final Shooter shooter;
+  private final LoggedTunableNumber bottomRPM =
+      new LoggedTunableNumber("/Tuning/Shooter/BottomRPM", 3000);
+  private final LoggedTunableNumber topRPM =
+      new LoggedTunableNumber("/Tuning/Shooter/TopRPM", 3000);
 
   /** Creates a new Shoot. */
   public Shoot(Shooter shooter) {
@@ -24,9 +29,11 @@ public class Shoot extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooter.setMotorRPM(.25 * 12); // fix this
+    // shooter.setMotorVoltage(.25 * 12);
+    shooter.setSplitSpeeds(topRPM.get(), bottomRPM.get());
+    shooter.setKickerSpeed(.75);
     // if (shooter.isAtSpeed()) {
-    shooter.setKickerSpeed(.5);
+    //   shooter.setKickerSpeed(.75);
     // }
   }
 
@@ -34,7 +41,7 @@ public class Shoot extends Command {
   @Override
   public void end(boolean interrupted) {
     shooter.setKickerSpeed(0);
-    shooter.setMotorRPM(0);
+    shooter.setSplitSpeeds(0, 0);
   }
 
   // Returns true when the command should end.

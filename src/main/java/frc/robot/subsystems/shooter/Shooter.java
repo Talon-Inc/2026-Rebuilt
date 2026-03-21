@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.shooter;
 
-import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Configs.ShooterConfigs;
 import frc.robot.Constants.ShooterConstants;
@@ -22,19 +21,23 @@ public class Shooter extends SubsystemBase {
 
   // Tunable Numbers
   private final LoggedTunableNumber kRPM =
-      new LoggedTunableNumber("Tuning/Shooter/kRPM", ShooterConstants.kRPM);
+      new LoggedTunableNumber("/Tuning/Shooter/kRPM", ShooterConstants.kRPM);
   private final LoggedTunableNumber kP =
-      new LoggedTunableNumber("Tuning/Shooter/kP", ShooterConstants.kP);
+      new LoggedTunableNumber("/Tuning/Shooter/kP", ShooterConstants.kP);
   private final LoggedTunableNumber kI =
-      new LoggedTunableNumber("Tuning/Shooter/kI", ShooterConstants.kI);
+      new LoggedTunableNumber("/Tuning/Shooter/kI", ShooterConstants.kI);
   private final LoggedTunableNumber kD =
-      new LoggedTunableNumber("Tuning/Shooter/kD", ShooterConstants.kD);
+      new LoggedTunableNumber("/Tuning/Shooter/kD", ShooterConstants.kD);
   private final LoggedTunableNumber kS =
-      new LoggedTunableNumber("Tuning/Shooter/kS", ShooterConstants.kS);
-  private final LoggedTunableNumber kV =
-      new LoggedTunableNumber("Tuning/Shooter/kV", ShooterConstants.kV);
-  private final LoggedTunableNumber kA =
-      new LoggedTunableNumber("Tuning/Shooter/kA", ShooterConstants.kA);
+      new LoggedTunableNumber("/Tuning/Shooter/kS", ShooterConstants.kS);
+  private final LoggedTunableNumber kVTop =
+      new LoggedTunableNumber("/Tuning/Shooter/kV", ShooterConstants.kV[0]);
+  private final LoggedTunableNumber kVBottom =
+      new LoggedTunableNumber("/Tuning/Shooter/kV", ShooterConstants.kV[1]);
+  private final LoggedTunableNumber kATop =
+      new LoggedTunableNumber("/Tuning/Shooter/kA", ShooterConstants.kA[0]);
+  private final LoggedTunableNumber kABottom =
+      new LoggedTunableNumber("/Tuning/Shooter/kA", ShooterConstants.kA[1]);
 
   /** Creates a new Shooter. */
   public Shooter(ShooterIO io) {
@@ -52,10 +55,24 @@ public class Shooter extends SubsystemBase {
     // Run Flywheel Logic
     runFlywheel(kRPM.get());
 
-    io.configurePID(io.getTopMotor(), ShooterConfigs.topConfig,
-        kP.get(), kI.get(), kD.get(), kS.get(), kV.get(), kA.get());
-    io.configurePID(io.getBottomMotor(), ShooterConfigs.bottomConfig,
-        kP.get(), kI.get(), kD.get(), kS.get(), kV.get(), kA.get());
+    io.configurePID(
+        io.getTopMotor(),
+        ShooterConfigs.topConfig,
+        kP.get(),
+        kI.get(),
+        kD.get(),
+        kS.get(),
+        kVTop.get(),
+        kATop.get());
+    io.configurePID(
+        io.getBottomMotor(),
+        ShooterConfigs.bottomConfig,
+        kP.get(),
+        kI.get(),
+        kD.get(),
+        kS.get(),
+        kVBottom.get(),
+        kABottom.get());
 
     // Log Goals
     Logger.recordOutput("Shooter/Goal/PrimaryRPM", targetTopRPM);
@@ -104,6 +121,8 @@ public class Shooter extends SubsystemBase {
   // Sets different speeds for Top and Bottom Rollers
   // This is useful  for controlling spin (backspin/topspin)
   public void setSplitSpeeds(double topRPM, double bottomRPM) {
+    io.setTopRPM(topRPM);
+    io.setBottomRPM(bottomRPM);
     this.targetTopRPM = topRPM;
     this.targetBottomRPM = bottomRPM;
   }

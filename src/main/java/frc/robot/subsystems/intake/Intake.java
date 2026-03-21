@@ -55,7 +55,7 @@ public class Intake extends SubsystemBase {
 
   // Tunable Numbers (For Roller)
   private final LoggedTunableNumber intakeVolts =
-      new LoggedTunableNumber("Tuning/Intake/RollerIntakeVolts", 8.0);
+      new LoggedTunableNumber("Tuning/Intake/RollerIntakeVolts", 10.5);
   private final LoggedTunableNumber feedVolts =
       new LoggedTunableNumber("Tuning/Intake/RollerFeedVolts", 6.0);
   private final LoggedTunableNumber ejectVolts =
@@ -147,7 +147,7 @@ public class Intake extends SubsystemBase {
           agitateCooldownLoops--;
         } else if (currentAmps > 60.0) {
           agitateMovingDown = !agitateMovingDown;
-          agitateCooldownLoops = 25;
+          agitateCooldownLoops = 5;
         }
 
         // LIMITS: Reverse direction if we hit our upper or lower bounds

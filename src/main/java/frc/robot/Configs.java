@@ -101,8 +101,8 @@ public final class Configs {
           .outputRange(-1, 1)
           .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
           .kS(ShooterConstants.kS)
-          .kV(ShooterConstants.kV)
-          .kA(ShooterConstants.kA);
+          .kV(ShooterConstants.kV[0])
+          .kA(ShooterConstants.kA[0]);
       topConfig
           .closedLoop
           .maxMotion // Set MAXMotion parameters for velocity control
@@ -123,8 +123,8 @@ public final class Configs {
           .outputRange(-1, 1)
           .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
           .kS(ShooterConstants.kS)
-          .kV(ShooterConstants.kV)
-          .kA(ShooterConstants.kA);
+          .kV(ShooterConstants.kV[1])
+          .kA(ShooterConstants.kA[1]);
       bottomConfig
           .closedLoop
           .maxMotion // Set MAXMotion parameters for velocity control
