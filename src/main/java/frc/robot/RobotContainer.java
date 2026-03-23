@@ -76,9 +76,8 @@ public class RobotContainer {
 
     vision =
         new Vision(
-            drive::addVisionMeasurement,
-            new VisionIOPhotonVision(camera0Name, robotToCamera0),
-            new VisionIOPhotonVision(camera1Name, robotToCamera1));
+            drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name, robotToCamera0));
+    // new VisionIOPhotonVision(camera1Name, robotToCamera1));
 
     // switch (Constants.currentMode) {
     //   case REAL:

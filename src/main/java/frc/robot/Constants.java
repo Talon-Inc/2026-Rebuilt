@@ -39,7 +39,7 @@ public final class Constants {
     // Intake motor confugurations
     public static final int kDeployMotorId = 11;
     public static final int kIntakeMotorId = 12;
-    public static final double kP = 0.002;
+    public static final double kP = 0.00125;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
     public static final double kS = 0.0;
@@ -58,22 +58,22 @@ public final class Constants {
     public static final int kBottomMotorId = 15;
 
     // --- Flywheel Constants (Bang-Bang) ---
-    public static final double kFlywheelToleranceRPM = 200.0;
-    public static final double kMaxRPM = 5700.0;
-    public static final double kBangBangVoltage = 12.0;
-    public static final double kRPM = 5000.0;
+    // public static final double kFlywheelToleranceRPM = 200.0;
+    // public static final double kMaxRPM = 5700.0;
+    // public static final double kBangBangVoltage = 12.0;
+    // public static final double kRPM = 5000.0;
     public static final boolean kTopInverted = false;
 
     // PID and feed forward values, if applicable [top, bottom]
-    public static final double kP = 0.0;
+    public static final double kP = 0.000225;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
-    public static final double kS = 0.0;
-    public static final double[] kV = {0.33, 0.22};
+    public static final double kS = 0.125;
+    public static final double[] kV = {0.00175, 0.00175};
 
     // MAXMotion Contants
-    public static final double kMaxAcceleration = 6000;
-    public static final double kError = 0.5;
+    // public static final double kMaxAcceleration = 6000;
+    // public static final double kError = 0.5;
   }
 
   public static final class FieldConstants {

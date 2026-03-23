@@ -52,7 +52,7 @@ public class Intake extends SubsystemBase {
       new LoggedTunableNumber("/Tuning/Intake/kS", IntakeConstants.kS);
   private final LoggedTunableNumber kV =
       new LoggedTunableNumber("/Tuning/Intake/kV", IntakeConstants.kV);
-  private final LoggedTunableNumber kG = new LoggedTunableNumber("/Tuning/Intake/kG", -0.4);
+  private final LoggedTunableNumber kG = new LoggedTunableNumber("/Tuning/Intake/kG", -.6);
 
   // Tunable Numbers (For Roller)
   private final LoggedTunableNumber intakeVolts =
