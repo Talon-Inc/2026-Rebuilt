@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.6416833095577745,
-        "y": 4.067346647646221
+        "x": 2.654621968616262,
+        "y": 4.42962910128388
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 2.0076890156918683,
-        "y": 4.080285306704707
+        "x": 0.4679885877318113,
+        "y": 5.788188302425108
       },
       "prevControl": {
-        "x": 2.8616405135520675,
-        "y": 4.041469329529244
+        "x": 1.4254493580599144,
+        "y": 5.904636233951498
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "BackUpPathEnding"
     }
   ],
   "rotationTargets": [],
@@ -45,7 +45,7 @@
     "rotation": 0.0
   },
   "reversed": false,
-  "folder": "New Folder",
+  "folder": "BackUp-Depot Path",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0
