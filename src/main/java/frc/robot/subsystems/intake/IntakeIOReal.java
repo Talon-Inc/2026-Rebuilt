@@ -77,14 +77,7 @@ public class IntakeIOReal implements IntakeIO {
     // This way it only applies new config when the dashboard numbers change
     SparkMaxConfig updateConfig = new SparkMaxConfig();
     updateConfig.apply(IntakeConfigs.deployConfig);
-    updateConfig
-        .closedLoop
-        .p(kP)
-        .i(kI)
-        .d(kD)
-        .feedForward
-        .kS(kS)
-        .kV(kV);
+    updateConfig.closedLoop.p(kP).i(kI).d(kD).feedForward.kS(kS).kV(kV);
     deployMotor.configure(
         updateConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }

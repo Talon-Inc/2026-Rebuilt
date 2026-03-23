@@ -56,13 +56,13 @@ public final class Constants {
 
     // --- Flywheel Constants ---
     public static final double kFlywheelToleranceRPM = 200.0;
-    public static final boolean kTopInverted = false;
+    public static final boolean kTopInverted = true;
 
     // PID and feed forward values, if applicable [top, bottom]
-    public static final double kP = 0.000225;
+    public static final double kP = 0.000325;
     public static final double kI = 0.0;
-    public static final double kD = 0.0;
-    public static final double[] kS = {0.125, 0.125};
+    public static final double kD = 0.015;
+    public static final double[] kS = {0.1425, 0.112};
     public static final double[] kV = {0.00175, 0.00175};
   }
 

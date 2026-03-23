@@ -7,7 +7,6 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Configs.IntakeConfigs;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;

@@ -45,9 +45,7 @@ public class ShooterIOReal implements ShooterIO {
 
     // Configure Motors
     topMotor.configure(
-        ShooterConfigs.topConfig,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
+        ShooterConfigs.topConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     bottomMotor.configure(
         ShooterConfigs.bottomConfig,
@@ -80,8 +78,8 @@ public class ShooterIOReal implements ShooterIO {
   /**
    * Update Inputs functions as a way to update the Values in the Logging framework from the REAL
    * sensor values
-   * 
-   * inputs.[value name] sets the value for the variables you created in ShooterIO
+   *
+   * <p>inputs.[value name] sets the value for the variables you created in ShooterIO
    */
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
@@ -110,7 +108,7 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void configurePID(
+  public void updatePID(
       SparkBase motor,
       SparkBaseConfig config,
       double kP,

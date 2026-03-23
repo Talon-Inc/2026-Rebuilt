@@ -55,7 +55,7 @@ public class Shooter extends SubsystemBase {
         || kSBottom.hasChanged()
         || kVTop.hasChanged()
         || kVBottom.hasChanged()) {
-      io.configurePID(
+      io.updatePID(
           io.getTopMotor(),
           ShooterConfigs.topConfig,
           kP.get(),
@@ -63,9 +63,9 @@ public class Shooter extends SubsystemBase {
           kD.get(),
           kSTop.get(),
           kVTop.get());
-      io.configurePID(
+      io.updatePID(
           io.getBottomMotor(),
-          ShooterConfigs.topConfig,
+          ShooterConfigs.bottomConfig,
           kP.get(),
           kI.get(),
           kD.get(),
@@ -106,8 +106,10 @@ public class Shooter extends SubsystemBase {
    * @return True if flywheels are within tolerance of target
    */
   public boolean isAtSpeed() {
-    boolean topReady = Math.abs(inputs.topRPM - targetTopRPM) < ShooterConstants.kFlywheelToleranceRPM;
-    boolean bottomReady = Math.abs(inputs.bottomRPM - targetBottomRPM) < ShooterConstants.kFlywheelToleranceRPM;
+    boolean topReady =
+        Math.abs(inputs.topRPM - targetTopRPM) < ShooterConstants.kFlywheelToleranceRPM;
+    boolean bottomReady =
+        Math.abs(inputs.bottomRPM - targetBottomRPM) < ShooterConstants.kFlywheelToleranceRPM;
 
     return topReady && bottomReady;
   }
