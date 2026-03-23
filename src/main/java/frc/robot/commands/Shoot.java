@@ -12,9 +12,9 @@ import frc.robot.util.LoggedTunableNumber;
 public class Shoot extends Command {
   private final Shooter shooter;
   private final LoggedTunableNumber bottomRPM =
-      new LoggedTunableNumber("/Tuning/Shooter/BottomRPM", 3000);
+      new LoggedTunableNumber("/Tuning/Shooter/BottomRPM", 2400);
   private final LoggedTunableNumber topRPM =
-      new LoggedTunableNumber("/Tuning/Shooter/TopRPM", 3000);
+      new LoggedTunableNumber("/Tuning/Shooter/TopRPM", 2400);
 
   /** Creates a new Shoot. */
   public Shoot(Shooter shooter) {
@@ -31,12 +31,16 @@ public class Shoot extends Command {
   public void execute() {
     // shooter.setMotorVoltage(.25 * 12);
     shooter.setSplitSpeeds(topRPM.get(), bottomRPM.get());
-    shooter.setKickerSpeed(.75);
+    // shooter.setKickerSpeed(.75);
     // if (shooter.isAtSpeed()) {
     //   shooter.setKickerSpeed(.75);
     // }
+    if (shooter.isAtSpeed()) {
+      shooter.setKickerSpeed(0.75);
+    } else {
+      shooter.setKickerSpeed(0.0);
+    }
   }
-
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {

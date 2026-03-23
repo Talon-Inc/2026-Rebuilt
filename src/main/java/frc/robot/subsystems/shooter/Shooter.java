@@ -20,8 +20,6 @@ public class Shooter extends SubsystemBase {
   private double targetKickerRPM = 0.0;
 
   // Tunable Numbers
-  private final LoggedTunableNumber kRPM =
-      new LoggedTunableNumber("/Tuning/Shooter/kRPM", ShooterConstants.kRPM);
   private final LoggedTunableNumber kP =
       new LoggedTunableNumber("/Tuning/Shooter/kP", ShooterConstants.kP);
   private final LoggedTunableNumber kI =
@@ -31,9 +29,9 @@ public class Shooter extends SubsystemBase {
   private final LoggedTunableNumber kS =
       new LoggedTunableNumber("/Tuning/Shooter/kS", ShooterConstants.kS);
   private final LoggedTunableNumber kVTop =
-      new LoggedTunableNumber("/Tuning/Shooter/kV", ShooterConstants.kV[0]);
+      new LoggedTunableNumber("/Tuning/Shooter/kVTop", ShooterConstants.kV[0]);
   private final LoggedTunableNumber kVBottom =
-      new LoggedTunableNumber("/Tuning/Shooter/kV", ShooterConstants.kV[1]);
+      new LoggedTunableNumber("/Tuning/Shooter/kVBottom", ShooterConstants.kV[1]);
   /** Creates a new Shooter. */
   public Shooter(ShooterIO io) {
     this.io = io;
@@ -47,12 +45,30 @@ public class Shooter extends SubsystemBase {
     Logger.processInputs("Shooter", inputs);
 
     // Update Tunables (This is for Live Tuning should make tuning faster)
-    if (kP.hasChanged() || kI.hasChanged() || kD.hasChanged() || kS.hasChanged() ||
-    kVTop.hasChanged() || kVBottom.hasChanged()) {
-      io.configurePID(io.getTopMotor(), ShooterConfigs.topConfig, kP.get(), kI.get(), kD.get(), kS.get(), kVTop.get());
-      io.configurePID(io.getBottomMotor(), ShooterConfigs.topConfig, kP.get(), kI.get(), kD.get(), kS.get(), kVBottom.get());
+    if (kP.hasChanged()
+        || kI.hasChanged()
+        || kD.hasChanged()
+        || kS.hasChanged()
+        || kVTop.hasChanged()
+        || kVBottom.hasChanged()) {
+      io.configurePID(
+          io.getTopMotor(),
+          ShooterConfigs.topConfig,
+          kP.get(),
+          kI.get(),
+          kD.get(),
+          kS.get(),
+          kVTop.get());
+      io.configurePID(
+          io.getBottomMotor(),
+          ShooterConfigs.topConfig,
+          kP.get(),
+          kI.get(),
+          kD.get(),
+          kS.get(),
+          kVBottom.get());
     }
-    
+
     io.setTopRPM(targetTopRPM);
     io.setBottomRPM(targetBottomRPM);
 
@@ -111,11 +127,9 @@ public class Shooter extends SubsystemBase {
    * @return True if flywheels are within tolerance of target
    */
   public boolean isAtSpeed() {
-    boolean topReady =
-        Math.abs(inputs.topRPM - targetTopRPM) < ShooterConstants.kFlywheelToleranceRPM;
+    boolean topReady = Math.abs(inputs.topRPM - targetTopRPM) < 200;
 
-    boolean bottomReady =
-        Math.abs(inputs.bottomRPM - targetBottomRPM) < ShooterConstants.kFlywheelToleranceRPM;
+    boolean bottomReady = Math.abs(inputs.bottomRPM - targetBottomRPM) < 200;
 
     return topReady && bottomReady;
   }
