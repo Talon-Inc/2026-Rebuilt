@@ -7,6 +7,7 @@ package frc.robot.subsystems.intake;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs.IntakeConfigs;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
@@ -52,7 +53,8 @@ public class Intake extends SubsystemBase {
       new LoggedTunableNumber("/Tuning/Intake/kS", IntakeConstants.kS);
   private final LoggedTunableNumber kV =
       new LoggedTunableNumber("/Tuning/Intake/kV", IntakeConstants.kV);
-  private final LoggedTunableNumber kG = new LoggedTunableNumber("/Tuning/Intake/kG", -.6);
+  private final LoggedTunableNumber kG =
+      new LoggedTunableNumber("/Tuning/Intake/kG", IntakeConstants.kG);
 
   // Tunable Numbers (For Roller)
   private final LoggedTunableNumber intakeVolts =
@@ -96,7 +98,8 @@ public class Intake extends SubsystemBase {
         || kI.hasChanged()
         || kD.hasChanged()
         || kS.hasChanged()
-        || kV.hasChanged()) {
+        || kV.hasChanged()
+        || kG.hasChanged()) {
       io.updatePID(kP.get(), kI.get(), kD.get(), kS.get(), kV.get());
     }
 
@@ -117,7 +120,7 @@ public class Intake extends SubsystemBase {
           restingAngle = inputs.deployAngleDeg;
         }
 
-        // if obstructed, hold the resiting angle forever. if not then go to 3.0
+        // if obstructed, hold the resting angle forever. if not then go to 3.0
         currentTargetAngle = hitObstruction ? restingAngle : 27.0;
         io.setDeployPosition(currentTargetAngle, gravityVoltage);
         io.setRollerVoltage(0.0);

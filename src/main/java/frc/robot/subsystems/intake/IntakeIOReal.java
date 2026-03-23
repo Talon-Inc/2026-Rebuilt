@@ -52,6 +52,11 @@ public class IntakeIOReal implements IntakeIO {
   }
 
   @Override
+  public void setDeployPosition(double angleDeg) {
+    deployController.setSetpoint(angleDeg, ControlType.kPosition);
+  }
+
+  @Override
   public void setDeployPosition(double angleDeg, double feedForwardVolts) {
     // We'll test sending gravity voltage (Although we might not need this)
     deployController.setSetpoint(
@@ -71,8 +76,16 @@ public class IntakeIOReal implements IntakeIO {
   public void updatePID(double kP, double kI, double kD, double kS, double kV) {
     // This way it only applies new config when the dashboard numbers change
     SparkMaxConfig updateConfig = new SparkMaxConfig();
-    updateConfig.closedLoop.p(kP).i(kI).d(kD).feedForward.kS(kS).kV(kV);
+    updateConfig.apply(IntakeConfigs.deployConfig);
+    updateConfig
+        .closedLoop
+        .p(kP)
+        .i(kI)
+        .d(kD)
+        .feedForward
+        .kS(kS)
+        .kV(kV);
     deployMotor.configure(
-        updateConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        updateConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 }

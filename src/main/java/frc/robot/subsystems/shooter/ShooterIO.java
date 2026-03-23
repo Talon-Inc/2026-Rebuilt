@@ -26,8 +26,8 @@ public interface ShooterIO {
     public double[] bottomAmps = new double[] {};
   }
 
+  // Getters for the top and bottom motors
   public SparkBase getTopMotor();
-
   public SparkBase getBottomMotor();
 
   // Updates the set of loggable inputs
@@ -38,7 +38,6 @@ public interface ShooterIO {
 
   // Run the shooters (RPM)
   public default void setTopRPM(double rpm) {}
-
   public default void setBottomRPM(double rpm) {}
 
   // Configure PID Constants (Optional if tuning via Advantage Scope)

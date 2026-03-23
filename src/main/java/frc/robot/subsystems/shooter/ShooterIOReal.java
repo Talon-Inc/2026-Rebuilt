@@ -45,9 +45,10 @@ public class ShooterIOReal implements ShooterIO {
 
     // Configure Motors
     topMotor.configure(
-        ShooterConfigs.topConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        ShooterConfigs.topConfig,
+        ResetMode.kResetSafeParameters,
+        PersistMode.kPersistParameters);
 
-    // ShooterConfigs.followerConfig.follow(topMotor, true);
     bottomMotor.configure(
         ShooterConfigs.bottomConfig,
         ResetMode.kResetSafeParameters,
@@ -58,11 +59,17 @@ public class ShooterIOReal implements ShooterIO {
     bottomController = bottomMotor.getClosedLoopController();
   }
 
+  /**
+   * @return the top shooter motor
+   */
   @Override
   public SparkBase getTopMotor() {
     return topMotor;
   }
 
+  /**
+   * @return the bottom shooter motor
+   */
   @Override
   public SparkBase getBottomMotor() {
     return bottomMotor;
@@ -70,12 +77,14 @@ public class ShooterIOReal implements ShooterIO {
 
   // -- LOGIC --
 
-  // Update Inputs functions as a way to update the Values in the Logging framework from the REAL
-  // sensor values
+  /**
+   * Update Inputs functions as a way to update the Values in the Logging framework from the REAL
+   * sensor values
+   * 
+   * inputs.[value name] sets the value for the variables you created in ShooterIO
+   */
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    // Primary Flywheel
-    // inputs.[value name] sets the value for the variables you created in ShooterIO
     inputs.topRPM = topMotor.getEncoder().getVelocity();
     inputs.topVolts = topMotor.getAppliedOutput() * topMotor.getBusVoltage();
     inputs.topAmps = new double[] {topMotor.getOutputCurrent()};

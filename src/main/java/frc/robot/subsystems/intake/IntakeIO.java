@@ -18,7 +18,8 @@ public interface IntakeIO {
 
   public default void updateInputs(IntakeIOInputs inputs) {}
 
-  // commands
+  // Commands
+  public default void setDeployPosition(double angleDeg) {}
   public default void setDeployPosition(double angleDeg, double feedForwardVolts) {}
 
   public default void setRollerVoltage(double volts) {}

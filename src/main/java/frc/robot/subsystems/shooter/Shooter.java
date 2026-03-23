@@ -26,12 +26,15 @@ public class Shooter extends SubsystemBase {
       new LoggedTunableNumber("/Tuning/Shooter/kI", ShooterConstants.kI);
   private final LoggedTunableNumber kD =
       new LoggedTunableNumber("/Tuning/Shooter/kD", ShooterConstants.kD);
-  private final LoggedTunableNumber kS =
-      new LoggedTunableNumber("/Tuning/Shooter/kS", ShooterConstants.kS);
+  private final LoggedTunableNumber kSTop =
+      new LoggedTunableNumber("/Tuning/Shooter/kSTop", ShooterConstants.kS[0]);
+  private final LoggedTunableNumber kSBottom =
+      new LoggedTunableNumber("/Tuning/Shooter/kSBottom", ShooterConstants.kS[1]);
   private final LoggedTunableNumber kVTop =
       new LoggedTunableNumber("/Tuning/Shooter/kVTop", ShooterConstants.kV[0]);
   private final LoggedTunableNumber kVBottom =
       new LoggedTunableNumber("/Tuning/Shooter/kVBottom", ShooterConstants.kV[1]);
+
   /** Creates a new Shooter. */
   public Shooter(ShooterIO io) {
     this.io = io;
@@ -48,7 +51,8 @@ public class Shooter extends SubsystemBase {
     if (kP.hasChanged()
         || kI.hasChanged()
         || kD.hasChanged()
-        || kS.hasChanged()
+        || kSTop.hasChanged()
+        || kSBottom.hasChanged()
         || kVTop.hasChanged()
         || kVBottom.hasChanged()) {
       io.configurePID(
@@ -57,7 +61,7 @@ public class Shooter extends SubsystemBase {
           kP.get(),
           kI.get(),
           kD.get(),
-          kS.get(),
+          kSTop.get(),
           kVTop.get());
       io.configurePID(
           io.getBottomMotor(),
@@ -65,7 +69,7 @@ public class Shooter extends SubsystemBase {
           kP.get(),
           kI.get(),
           kD.get(),
-          kS.get(),
+          kSBottom.get(),
           kVBottom.get());
     }
 
@@ -73,42 +77,17 @@ public class Shooter extends SubsystemBase {
     io.setBottomRPM(targetBottomRPM);
 
     // Log Goals
-    Logger.recordOutput("Shooter/Goal/PrimaryRPM", targetTopRPM);
-    Logger.recordOutput("Shooter/Goal/SecondaryRPM", targetBottomRPM);
+    Logger.recordOutput("Shooter/Goal/TopRPM", targetTopRPM);
+    Logger.recordOutput("Shooter/Goal/BottomRPM", targetBottomRPM);
     Logger.recordOutput("Shooter/Goal/KickerRPM", targetKickerRPM);
   }
 
-  // PID controlled velocity
-  private void runFlywheel(double rpm) {
-    io.setTopRPM(rpm);
-    io.setBottomRPM(rpm);
-  }
-
-  // // Core Bang-Bang Logic
-  // private void runFlywheel(
-  //     BangBangController controller,
-  //     double currentRPM,
-  //     double target,
-  //     boolean isTop,
-  //     double voltageToUse) {
-  //   // Only run if we actualy have a target (avoids jitter at 0 RPM)
-  //   if (target > 50.0) {
-  //     // .calculate() returns 1.0 if we need speed, 0.0 if we don't
-  //     double demand = controller.calculate(currentRPM, target);
-
-  //     // Multiply by Max Voltage (12V)
-  //     double volts = demand * voltageToUse;
-
-  //     if (isTop) io.setTopRPM(volts);
-  //     else io.setBottomRPM(volts);
-  //   } else {
-  //     // Idle Mode
-  //     if (isTop) io.setTopRPM(0.0);
-  //     else io.setBottomRPM(0.0);
-  //   }
-  // }
-
   // --- Commands ---
+
+  // Run kicker (wheels that feed into the shooter)
+  public void setKickerSpeed(double speed) {
+    io.setKickerSpeed(speed);
+  }
 
   // This will set rollers to the exact same speeds (Natural Backspin)
   public void setTargetSpeed(double rpm) {
@@ -127,20 +106,9 @@ public class Shooter extends SubsystemBase {
    * @return True if flywheels are within tolerance of target
    */
   public boolean isAtSpeed() {
-    boolean topReady = Math.abs(inputs.topRPM - targetTopRPM) < 200;
-
-    boolean bottomReady = Math.abs(inputs.bottomRPM - targetBottomRPM) < 200;
+    boolean topReady = Math.abs(inputs.topRPM - targetTopRPM) < ShooterConstants.kFlywheelToleranceRPM;
+    boolean bottomReady = Math.abs(inputs.bottomRPM - targetBottomRPM) < ShooterConstants.kFlywheelToleranceRPM;
 
     return topReady && bottomReady;
-  }
-
-  // kicker (wheels that feed into the shooter)
-  public void setKickerSpeed(double speed) {
-    io.setKickerSpeed(speed);
-  }
-
-  public void setMotorRPM(double rpm) {
-    this.targetTopRPM = rpm;
-    this.targetBottomRPM = rpm;
   }
 }

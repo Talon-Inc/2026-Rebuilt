@@ -39,7 +39,7 @@ public final class Configs {
           .setSparkMaxDataPortConfig() // Tells Spark Max to use the data port
           .inverted(false)
           .positionConversionFactor(360) // Convert to degrees
-          .zeroOffset(0.0);
+          .zeroOffset(0.0); // Reset zero value to RAW zero
       deployConfig
           .closedLoop
           .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
@@ -75,16 +75,16 @@ public final class Configs {
       // Configure basic settings of the top motor
       topConfig
           .idleMode(IdleMode.kCoast)
-          .smartCurrentLimit(60) // High current limit for Bang-Bang Recovery
+          .smartCurrentLimit(60)
           .voltageCompensation(12)
           .inverted(ShooterConstants.kTopInverted);
 
       // Configure basic settings of the bottom motor
-      // Added follow in ShooterIOReal
       bottomConfig
           .idleMode(IdleMode.kCoast)
           .smartCurrentLimit(60)
           .voltageCompensation(12)
+          // invert compared to top motor
           .inverted(!ShooterConstants.kTopInverted);
 
       /*
@@ -100,7 +100,7 @@ public final class Configs {
           .d(ShooterConstants.kD)
           .outputRange(-1, 1)
           .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
-          .kS(ShooterConstants.kS)
+          .kS(ShooterConstants.kS[0])
           .kV(ShooterConstants.kV[0]);
       // topConfig
       //     .closedLoop
@@ -121,7 +121,7 @@ public final class Configs {
           .d(ShooterConstants.kD)
           .outputRange(-1, 1)
           .feedForward // https://docs.revrobotics.com/revlib/spark/closed-loop/feed-forward-control
-          .kS(ShooterConstants.kS)
+          .kS(ShooterConstants.kS[1])
           .kV(ShooterConstants.kV[1]);
       // bottomConfig
       //     .closedLoop
