@@ -28,7 +28,7 @@ public class Intake extends SubsystemBase {
 
   // Agitating memory
   private boolean agitateMovingDown = true;
-  private double currentTargetAngle = 26.0; // This tracks where the arm is currently trying to go
+  private double currentTargetAngle = 203.0; // This tracks where the arm is currently trying to go
 
   // Something I got from 6328: This waits .1 seconds to ensure the arm has stopped bouncing
   private final Debouncer atGoalDebouncer = new Debouncer(0.1, DebounceType.kRising);
@@ -36,7 +36,7 @@ public class Intake extends SubsystemBase {
 
   // So if we hit an obstruction when trying to Stow it doesn't jitter
   private boolean hitObstruction = false;
-  private double restingAngle = 26.0;
+  private double restingAngle = 203.0;
 
   private int agitateCooldownLoops = 0;
   private int stowCooldownLoops = 0;
@@ -103,7 +103,7 @@ public class Intake extends SubsystemBase {
     }
 
     // Calculate the voltage for Gravity (kG * sin(angle))
-    double effectiveAngle = inputs.deployAngleDeg - 26.0;
+    double effectiveAngle = inputs.deployAngleDeg - 203.0;
     double gravityVoltage = kG.get() * Math.sin(Math.toRadians(effectiveAngle));
 
     // Run the STATE MACHINE
@@ -120,25 +120,25 @@ public class Intake extends SubsystemBase {
         }
 
         // if obstructed, hold the resting angle forever. if not then go to 3.0
-        currentTargetAngle = hitObstruction ? restingAngle : 27.0;
+        currentTargetAngle = hitObstruction ? restingAngle : 204.0;
         io.setDeployPosition(currentTargetAngle, gravityVoltage);
         io.setRollerVoltage(0.0);
         break;
 
       case PREP:
-        currentTargetAngle = 45.0;
+        currentTargetAngle = 222.0;
         io.setDeployPosition(currentTargetAngle, gravityVoltage);
         io.setRollerVoltage(0.0);
         break;
 
       case INTAKE:
-        currentTargetAngle = 113.0;
+        currentTargetAngle = 290.0;
         io.setDeployPosition(currentTargetAngle, gravityVoltage);
         io.setRollerVoltage(intakeVolts.get());
         break;
 
       case EJECT:
-        currentTargetAngle = 113.0;
+        currentTargetAngle = 290.0;
         io.setDeployPosition(currentTargetAngle, gravityVoltage);
         io.setRollerVoltage(ejectVolts.get());
         break;
@@ -159,16 +159,16 @@ public class Intake extends SubsystemBase {
         }
 
         // LIMITS: Reverse direction if we hit our upper or lower bounds
-        if (inputs.deployAngleDeg >= 48.0) {
+        if (inputs.deployAngleDeg >= 225.0) {
           agitateMovingDown = false; // Go up
           agitateCooldownLoops = 15;
-        } else if (!agitateMovingDown && inputs.deployAngleDeg <= 28.0) {
+        } else if (!agitateMovingDown && inputs.deployAngleDeg <= 205.0) {
           agitateMovingDown = true; // Go down
           agitateCooldownLoops = 15;
         }
 
         // What makes it move
-        currentTargetAngle = agitateMovingDown ? 45.0 : 26.0;
+        currentTargetAngle = agitateMovingDown ? 222.0 : 203.0;
         io.setDeployPosition(currentTargetAngle, gravityVoltage);
         break;
     }
