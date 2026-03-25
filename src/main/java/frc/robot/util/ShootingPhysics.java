@@ -6,7 +6,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-// import frc.robot.Constants.ShooterConstants;
 
 public class ShootingPhysics {
 
@@ -15,11 +14,8 @@ public class ShootingPhysics {
       new InterpolatingDoubleTreeMap();
 
   // Key: Distance (m), Value: RPM
-  private static final InterpolatingDoubleTreeMap rpmMap = new InterpolatingDoubleTreeMap();
-
   private static final InterpolatingDoubleTreeMap topRPMMap = new InterpolatingDoubleTreeMap();
   private static final InterpolatingDoubleTreeMap bottomRPMMap = new InterpolatingDoubleTreeMap();
-
 
   // PASSING MAPS
   private static final InterpolatingDoubleTreeMap passTimeOfFlightMap =
@@ -36,19 +32,18 @@ public class ShootingPhysics {
     timeOfFlightMap.put(1.0, .2);
     timeOfFlightMap.put(5.0, 1.0);
 
-    // Key: Distance(m), Value:RPM
-    bottomRPMMap.put(1.549, 2500.0);
-    bottomRPMMap.put(2.667, 4000.0);
-    bottomRPMMap.put(5.0, 5000.0);
-
-    // Key: Distance(m), Value:RPM
+    // Key: Distance(m), Value: RPM
     topRPMMap.put(1.549, 2500.0);
     topRPMMap.put(2.667, 4000.0);
     topRPMMap.put(5.0, 5000.0);
 
+    // Key: Distance(m), Value: RPM
+    bottomRPMMap.put(1.549, 2500.0);
+    bottomRPMMap.put(2.667, 4000.0);
+    bottomRPMMap.put(5.0, 5000.0);
+
     // Passing Data
     passTimeOfFlightMap.put(2.0, 0.4);
-
     passTimeOfFlightMap.put(8.0, 1.2);
 
     passTopRPM.put(2.0, 1000.0);
@@ -149,7 +144,7 @@ public class ShootingPhysics {
         effectiveDistance);
   }
 
-  // ***DISCLAIMER**
+  // ***DISCLAIMER***
   // THESE ARE OLD CODE; it was used to calculate SOTF using Vectors * latency
   // Mock Lookup Table: Distance (m) -> Horizontal Velocity (m/s)
   @SuppressWarnings("unused")
