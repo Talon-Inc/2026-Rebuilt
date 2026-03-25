@@ -17,12 +17,9 @@ public class ShootingPhysics {
   // Key: Distance (m), Value: RPM
   private static final InterpolatingDoubleTreeMap rpmMap = new InterpolatingDoubleTreeMap();
 
-  // Key: Distance (m), Value: Hood Angle (Degrees)
-  private static final InterpolatingDoubleTreeMap hoodMap = new InterpolatingDoubleTreeMap();
-
+  private static final InterpolatingDoubleTreeMap topRPMMap = new InterpolatingDoubleTreeMap();
   private static final InterpolatingDoubleTreeMap bottomRPMMap = new InterpolatingDoubleTreeMap();
 
-  private static final InterpolatingDoubleTreeMap topRPMMap = new InterpolatingDoubleTreeMap();
 
   // PASSING MAPS
   private static final InterpolatingDoubleTreeMap passTimeOfFlightMap =

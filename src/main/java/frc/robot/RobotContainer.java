@@ -114,7 +114,7 @@ public class RobotContainer {
     //     break;
     // }
 
-    // Setup Commands for Pahtplanner
+    // Setup Commands for Pathplanner
     NamedCommands.registerCommand(
         "Intake", Commands.runOnce(() -> intake.setState(IntakeState.INTAKE)));
     NamedCommands.registerCommand(
