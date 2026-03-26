@@ -14,6 +14,11 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
+  
+  // Target angles for STATE MACHINE enums
+  private final double stowTargetAngle = 2.0;
+  private final double prepTargetAngle = 21.0;
+  private final double intakeTargetAngle = 89.0; // also used for eject
 
   // STATE MACHINE (Yes, I added this, it improves so much, I'll tell in person)
   public enum IntakeState {
@@ -21,22 +26,23 @@ public class Intake extends SubsystemBase {
     INTAKE, // Down, Spinning in
     EJECT, // Down, Spinning out
     AGITATE, // Smart Agittation
-    PREP // This will wait in position, rollers off (Sepcifically for ShootComand)
+    PREP // This will wait in position, rollers off (Specifically for ShootCommand)
   }
 
   private IntakeState currentState = IntakeState.STOW;
 
   // Agitating memory
   private boolean agitateMovingDown = true;
-  private double currentTargetAngle = 203.0; // This tracks where the arm is currently trying to go
+  private double currentTargetAngle = stowTargetAngle; // This tracks where the arm is currently trying to go
+  
 
-  // Something I got from 6328: This waits .1 seconds to ensure the arm has stopped bouncing
+  // Something I got from 6328: This waits 0.1 seconds to ensure the arm has stopped bouncing
   private final Debouncer atGoalDebouncer = new Debouncer(0.1, DebounceType.kRising);
   private boolean isStableAtGoal = false;
 
   // So if we hit an obstruction when trying to Stow it doesn't jitter
   private boolean hitObstruction = false;
-  private double restingAngle = 203.0;
+  private double restingAngle = stowTargetAngle;
 
   private int agitateCooldownLoops = 0;
   private int stowCooldownLoops = 0;
@@ -103,7 +109,7 @@ public class Intake extends SubsystemBase {
     }
 
     // Calculate the voltage for Gravity (kG * sin(angle))
-    double effectiveAngle = inputs.deployAngleDeg - 203.0;
+    double effectiveAngle = inputs.deployAngleDeg - stowTargetAngle;
     double gravityVoltage = kG.get() * Math.sin(Math.toRadians(effectiveAngle));
 
     // Run the STATE MACHINE
@@ -120,26 +126,22 @@ public class Intake extends SubsystemBase {
         }
 
         // if obstructed, hold the resting angle forever. if not then go to 3.0
-        currentTargetAngle = hitObstruction ? restingAngle : 204.0;
-        io.setDeployPosition(currentTargetAngle, gravityVoltage);
+        currentTargetAngle = hitObstruction ? restingAngle : stowTargetAngle + 1;
         io.setRollerVoltage(0.0);
         break;
 
       case PREP:
-        currentTargetAngle = 222.0;
-        io.setDeployPosition(currentTargetAngle, gravityVoltage);
+        currentTargetAngle = prepTargetAngle;
         io.setRollerVoltage(0.0);
         break;
 
       case INTAKE:
-        currentTargetAngle = 290.0;
-        io.setDeployPosition(currentTargetAngle, gravityVoltage);
+        currentTargetAngle = intakeTargetAngle;
         io.setRollerVoltage(intakeVolts.get());
         break;
 
       case EJECT:
-        currentTargetAngle = 290.0;
-        io.setDeployPosition(currentTargetAngle, gravityVoltage);
+        currentTargetAngle = intakeTargetAngle;
         io.setRollerVoltage(ejectVolts.get());
         break;
 
@@ -159,19 +161,20 @@ public class Intake extends SubsystemBase {
         }
 
         // LIMITS: Reverse direction if we hit our upper or lower bounds
-        if (inputs.deployAngleDeg >= 225.0) {
+        if (inputs.deployAngleDeg >= 24.0) {
           agitateMovingDown = false; // Go up
           agitateCooldownLoops = 15;
-        } else if (!agitateMovingDown && inputs.deployAngleDeg <= 205.0) {
+        } else if (!agitateMovingDown && inputs.deployAngleDeg <= 4.0) {
           agitateMovingDown = true; // Go down
           agitateCooldownLoops = 15;
         }
 
         // What makes it move
-        currentTargetAngle = agitateMovingDown ? 222.0 : 203.0;
-        io.setDeployPosition(currentTargetAngle, gravityVoltage);
+        currentTargetAngle = agitateMovingDown ? prepTargetAngle : stowTargetAngle;
         break;
     }
+    // Set the deploy angle after the STATE MACHINE returns the proper angle
+    io.setDeployPosition(currentTargetAngle, gravityVoltage);
 
     Logger.recordOutput("Intake/TargetAngleDeg", currentTargetAngle);
 

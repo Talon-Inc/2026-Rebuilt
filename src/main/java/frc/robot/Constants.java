@@ -36,6 +36,8 @@ public final class Constants {
     public static final int kDeployMotorId = 11;
     public static final int kIntakeMotorId = 12;
 
+    public static final double kStartAngle = 203.0;
+
     // PID and feed forward values
     public static final double kP = 0.00125;
     public static final double kI = 0.0;
