@@ -36,7 +36,10 @@ public final class Constants {
     public static final int kDeployMotorId = 11;
     public static final int kIntakeMotorId = 12;
 
-    public static final double kStartAngle = 200.0;
+    public static final double kStartAngle = 203.0;
+    public static final double kStowTargetAngle = 26.0;
+    public static final double kPrepTargetAngle = 45.0;
+    public static final double kIntakeTargetAngle = 290.0; // also used for eject
 
     // PID and feed forward values
     public static final double kP = 0.00125;

@@ -40,7 +40,7 @@ public final class Configs {
           .inverted(false)
           .positionConversionFactor(360) // Convert to degrees
           .zeroOffset(
-              (IntakeConstants.kStartAngle - 2) / 360); // Reset zero value to a bit behind stow
+              (IntakeConstants.kStartAngle - 26) / 360); // Reset zero value to a bit behind stow
       deployConfig
           .closedLoop
           .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)

@@ -30,9 +30,9 @@ public class IntakeIOReal implements IntakeIO {
     safedeployConfig
         .softLimit
         .forwardSoftLimitEnabled(true)
-        .forwardSoftLimit(91.0) // Bottom limit
+        .forwardSoftLimit(IntakeConstants.kIntakeTargetAngle + 2) // Bottom limit
         .reverseSoftLimitEnabled(true)
-        .reverseSoftLimit(1.0); // Top Limit
+        .reverseSoftLimit(IntakeConstants.kStowTargetAngle - 1); // Top Limit
 
     deployMotor.configure(
         safedeployConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);

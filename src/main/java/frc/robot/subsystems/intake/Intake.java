@@ -15,11 +15,6 @@ public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
 
-  // Target angles for STATE MACHINE enums
-  private final double stowTargetAngle = 2.0;
-  private final double prepTargetAngle = 21.0;
-  private final double intakeTargetAngle = 89.0; // also used for eject
-
   // STATE MACHINE (Yes, I added this, it improves so much, I'll tell in person)
   public enum IntakeState {
     STOW, // Up, Roller is off
@@ -34,7 +29,7 @@ public class Intake extends SubsystemBase {
   // Agitating memory
   private boolean agitateMovingDown = true;
   private double currentTargetAngle =
-      stowTargetAngle; // This tracks where the arm is currently trying to go
+      IntakeConstants.kStowTargetAngle; // This tracks where the arm is currently trying to go
 
   // Something I got from 6328: This waits 0.1 seconds to ensure the arm has stopped bouncing
   private final Debouncer atGoalDebouncer = new Debouncer(0.1, DebounceType.kRising);
@@ -42,7 +37,7 @@ public class Intake extends SubsystemBase {
 
   // So if we hit an obstruction when trying to Stow it doesn't jitter
   private boolean hitObstruction = false;
-  private double restingAngle = stowTargetAngle;
+  private double restingAngle = IntakeConstants.kStowTargetAngle;
 
   private int agitateCooldownLoops = 0;
   private int stowCooldownLoops = 0;
@@ -109,7 +104,7 @@ public class Intake extends SubsystemBase {
     }
 
     // Calculate the voltage for Gravity (kG * sin(angle))
-    double effectiveAngle = inputs.deployAngleDeg - stowTargetAngle;
+    double effectiveAngle = inputs.deployAngleDeg - IntakeConstants.kStowTargetAngle;
     double gravityVoltage = kG.get() * Math.sin(Math.toRadians(effectiveAngle));
 
     // Run the STATE MACHINE
@@ -126,22 +121,22 @@ public class Intake extends SubsystemBase {
         }
 
         // if obstructed, hold the resting angle forever. if not then go to 3.0
-        currentTargetAngle = hitObstruction ? restingAngle : stowTargetAngle + 1;
+        currentTargetAngle = hitObstruction ? restingAngle : IntakeConstants.kStowTargetAngle + 1;
         io.setRollerVoltage(0.0);
         break;
 
       case PREP:
-        currentTargetAngle = prepTargetAngle;
+        currentTargetAngle = IntakeConstants.kPrepTargetAngle;
         io.setRollerVoltage(0.0);
         break;
 
       case INTAKE:
-        currentTargetAngle = intakeTargetAngle;
+        currentTargetAngle = IntakeConstants.kIntakeTargetAngle;
         io.setRollerVoltage(intakeVolts.get());
         break;
 
       case EJECT:
-        currentTargetAngle = intakeTargetAngle;
+        currentTargetAngle = IntakeConstants.kIntakeTargetAngle;
         io.setRollerVoltage(ejectVolts.get());
         break;
 
@@ -161,16 +156,16 @@ public class Intake extends SubsystemBase {
         }
 
         // LIMITS: Reverse direction if we hit our upper or lower bounds
-        if (inputs.deployAngleDeg >= 24.0) {
+        if (inputs.deployAngleDeg >= (IntakeConstants.kPrepTargetAngle + 3)) {
           agitateMovingDown = false; // Go up
           agitateCooldownLoops = 15;
-        } else if (!agitateMovingDown && inputs.deployAngleDeg <= 4.0) {
+        } else if (!agitateMovingDown && inputs.deployAngleDeg <= (IntakeConstants.kStowTargetAngle + 2)) {
           agitateMovingDown = true; // Go down
           agitateCooldownLoops = 15;
         }
 
         // What makes it move
-        currentTargetAngle = agitateMovingDown ? prepTargetAngle : stowTargetAngle;
+        currentTargetAngle = agitateMovingDown ? IntakeConstants.kPrepTargetAngle : IntakeConstants.kStowTargetAngle;
         break;
     }
     // Set the deploy angle after the STATE MACHINE returns the proper angle
