@@ -39,7 +39,8 @@ public final class Configs {
           .setSparkMaxDataPortConfig() // Tells Spark Max to use the data port
           .inverted(false)
           .positionConversionFactor(360) // Convert to degrees
-          .zeroOffset(IntakeConstants.kStartAngle - 2); // Reset zero value to a bit behind stow
+          .zeroOffset(
+              (IntakeConstants.kStartAngle - 2) / 360); // Reset zero value to a bit behind stow
       deployConfig
           .closedLoop
           .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)

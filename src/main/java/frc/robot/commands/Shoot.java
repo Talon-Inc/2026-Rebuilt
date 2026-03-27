@@ -36,7 +36,7 @@ public class Shoot extends Command {
     //   shooter.setKickerSpeed(.75);
     // }
     if (shooter.isAtSpeed()) {
-      shooter.setKickerSpeed(0.75);
+      shooter.setKickerSpeed(0.5);
     } else {
       shooter.setKickerSpeed(0.0);
     }

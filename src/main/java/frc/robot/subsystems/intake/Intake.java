@@ -14,7 +14,7 @@ import org.littletonrobotics.junction.Logger;
 public class Intake extends SubsystemBase {
   private final IntakeIO io;
   private final IntakeIOInputsAutoLogged inputs = new IntakeIOInputsAutoLogged();
-  
+
   // Target angles for STATE MACHINE enums
   private final double stowTargetAngle = 2.0;
   private final double prepTargetAngle = 21.0;
@@ -33,8 +33,8 @@ public class Intake extends SubsystemBase {
 
   // Agitating memory
   private boolean agitateMovingDown = true;
-  private double currentTargetAngle = stowTargetAngle; // This tracks where the arm is currently trying to go
-  
+  private double currentTargetAngle =
+      stowTargetAngle; // This tracks where the arm is currently trying to go
 
   // Something I got from 6328: This waits 0.1 seconds to ensure the arm has stopped bouncing
   private final Debouncer atGoalDebouncer = new Debouncer(0.1, DebounceType.kRising);

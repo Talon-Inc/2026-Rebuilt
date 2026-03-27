@@ -8,6 +8,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 
 public class ShootingPhysics {
+  private static final double hubDist = Units.inchesToMeters(24.0 / 2);
+  private static final double robotDist =
+      Units.inchesToMeters(27.5 / 2) + Units.inchesToMeters(3.5);
 
   // Key: Distance (m), Value: Time of Flight (s)
   private static final InterpolatingDoubleTreeMap timeOfFlightMap =
@@ -29,18 +32,22 @@ public class ShootingPhysics {
 
     // Scoring Data
     // Time of flight (this can be tuned by recording in slo-mo)
-    timeOfFlightMap.put(1.0, .2);
+    timeOfFlightMap.put(1.0, 0.2);
     timeOfFlightMap.put(5.0, 1.0);
 
     // Key: Distance(m), Value: RPM
-    topRPMMap.put(1.549, 2500.0);
-    topRPMMap.put(2.667, 4000.0);
-    topRPMMap.put(5.0, 5000.0);
+    topRPMMap.put(Units.feetToMeters(6 + robotDist + hubDist), 2450.0);
+    topRPMMap.put(Units.feetToMeters(7 + robotDist + hubDist), 2550.0);
+    topRPMMap.put(Units.feetToMeters(8 + robotDist + hubDist), 2600.0);
+    topRPMMap.put(Units.feetToMeters(11 + robotDist + hubDist), 2800.0);
+    topRPMMap.put(Units.feetToMeters(15 + robotDist + hubDist), 3150.0);
 
     // Key: Distance(m), Value: RPM
-    bottomRPMMap.put(1.549, 2500.0);
-    bottomRPMMap.put(2.667, 4000.0);
-    bottomRPMMap.put(5.0, 5000.0);
+    bottomRPMMap.put(Units.feetToMeters(6 + robotDist + hubDist), 2450.0);
+    bottomRPMMap.put(Units.feetToMeters(7 + robotDist + hubDist), 2550.0);
+    bottomRPMMap.put(Units.feetToMeters(8 + robotDist + hubDist), 2600.0);
+    bottomRPMMap.put(Units.feetToMeters(11 + robotDist + hubDist), 2800.0);
+    bottomRPMMap.put(Units.feetToMeters(15 + robotDist + hubDist), 3150.0);
 
     // Passing Data
     passTimeOfFlightMap.put(2.0, 0.4);
@@ -70,7 +77,7 @@ public class ShootingPhysics {
    * - V_robot/ground" * @param currentPose Current robot pose (from Odometry/Vision)
    *
    * @param fieldRelativeSpeeds Current robot velocity (Field Relative!)
-   * @param targetLocation Location of the goal (Speaker)
+   * @param targetLocation Location of the goal (Hub)
    * @return ShotSolution containing the field-relative angle and the necessary shooter speed
    */
   public static ShootSolution calculateShot(
