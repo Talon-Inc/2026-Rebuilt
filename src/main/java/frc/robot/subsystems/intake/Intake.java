@@ -160,7 +160,7 @@ public class Intake extends SubsystemBase {
           agitateMovingDown = false; // Go up
           agitateCooldownLoops = 15;
         } else if (!agitateMovingDown
-            && inputs.deployAngleDeg <= (IntakeConstants.kStowTargetAngle + 2)) {
+            && inputs.deployAngleDeg <= (IntakeConstants.kStowTargetAngle)) {
           agitateMovingDown = true; // Go down
           agitateCooldownLoops = 15;
         }
