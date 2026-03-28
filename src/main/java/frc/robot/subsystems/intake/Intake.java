@@ -159,13 +159,15 @@ public class Intake extends SubsystemBase {
         if (inputs.deployAngleDeg >= (IntakeConstants.kPrepTargetAngle + 3)) {
           agitateMovingDown = false; // Go up
           agitateCooldownLoops = 15;
-        } else if (!agitateMovingDown && inputs.deployAngleDeg <= (IntakeConstants.kStowTargetAngle + 2)) {
+        } else if (!agitateMovingDown
+            && inputs.deployAngleDeg <= (IntakeConstants.kStowTargetAngle + 2)) {
           agitateMovingDown = true; // Go down
           agitateCooldownLoops = 15;
         }
 
         // What makes it move
-        currentTargetAngle = agitateMovingDown ? IntakeConstants.kPrepTargetAngle : IntakeConstants.kStowTargetAngle;
+        currentTargetAngle =
+            agitateMovingDown ? IntakeConstants.kPrepTargetAngle : IntakeConstants.kStowTargetAngle;
         break;
     }
     // Set the deploy angle after the STATE MACHINE returns the proper angle
