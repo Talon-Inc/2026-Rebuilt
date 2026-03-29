@@ -15,7 +15,7 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
 
 public class DriveConstants {
-  public static final double maxSpeedMetersPerSec = 4.8;
+  public static final double maxSpeedMetersPerSec = 3.6;
   public static final double odometryFrequency = 100.0; // Hz
   public static final double trackWidth = Units.inchesToMeters(24);
   public static final double wheelBase = Units.inchesToMeters(24);
@@ -80,7 +80,7 @@ public class DriveConstants {
   public static final double turnEncoderVelocityFactor = (2 * Math.PI) / 60.0; // RPM -> Rad/Sec
 
   // Turn PID configuration
-  public static final double turnKp = 2.0;
+  public static final double turnKp = 1.5;
   public static final double turnKd = 0.0;
   public static final double turnSimP = 8.0;
   public static final double turnSimD = 0.0;

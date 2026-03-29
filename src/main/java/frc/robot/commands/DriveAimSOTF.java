@@ -35,7 +35,6 @@ public class DriveAimSOTF extends Command {
       new LoggedTunableNumber("/Tuning/DriveAim/kI", 0.0);
   private static final LoggedTunableNumber turnKd =
       new LoggedTunableNumber("/Tuning/DriveAim/kD", 0.0);
-
   private static final LoggedTunableNumber speedLimit =
       new LoggedTunableNumber("Tuning/DriveAim/MaxSpeed", 4.5);
 
@@ -119,17 +118,17 @@ public class DriveAimSOTF extends Command {
     // Get the speed limit
     double maxAllowedSpeed = maxTranslationSpeedMap.get(currentDistance);
 
-    // Get where the dirver wants to go
+    // Get where the driver wants to go
     double requestedSpeed = Math.hypot(driverX, driverY);
 
-    // Scale it down so the roobot can turn
+    // Scale it down so the robot can turn
     if (requestedSpeed > maxAllowedSpeed) {
       driverX = (driverX / requestedSpeed) * maxAllowedSpeed;
       driverY = (driverY / requestedSpeed) * maxAllowedSpeed;
     }
 
     // 4. Drive
-    // Pass Driver X/y, but overridr rotation with SOTF result
+    // Pass Driver x/y, but override rotation with SOTF result
     drive.runVelocity(
         ChassisSpeeds.fromFieldRelativeSpeeds(
             driverX, driverY, rotationOutput, drive.getRotation()));

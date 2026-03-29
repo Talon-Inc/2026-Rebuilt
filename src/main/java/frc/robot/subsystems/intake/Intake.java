@@ -58,9 +58,9 @@ public class Intake extends SubsystemBase {
 
   // Tunable Numbers (For Roller)
   private final LoggedTunableNumber intakeVolts =
-      new LoggedTunableNumber("/Tuning/Intake/RollerIntakeVolts", 10.5);
+      new LoggedTunableNumber("/Tuning/Intake/RollerIntakeVolts", 8.0);
   private final LoggedTunableNumber feedVolts =
-      new LoggedTunableNumber("/Tuning/Intake/RollerFeedVolts", 6.0);
+      new LoggedTunableNumber("/Tuning/Intake/RollerFeedVolts", 0.0);
   private final LoggedTunableNumber ejectVolts =
       new LoggedTunableNumber("/Tuning/Intake/RollerEjectVolts", -6.0);
 

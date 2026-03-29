@@ -29,7 +29,6 @@ public class ShootingPhysics {
   static {
     // The More the data you put the more accurate it's going to be
     // But don't put too much
-
     // Scoring Data
     // Time of flight (this can be tuned by recording in slo-mo)
     timeOfFlightMap.put(1.0, 0.2);

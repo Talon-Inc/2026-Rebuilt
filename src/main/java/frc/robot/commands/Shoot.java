@@ -12,9 +12,9 @@ import frc.robot.util.LoggedTunableNumber;
 public class Shoot extends Command {
   private final Shooter shooter;
   private final LoggedTunableNumber bottomRPM =
-      new LoggedTunableNumber("/Tuning/Shooter/BottomRPM", 2400);
+      new LoggedTunableNumber("/Tuning/Shooter/BottomRPM", 2800);
   private final LoggedTunableNumber topRPM =
-      new LoggedTunableNumber("/Tuning/Shooter/TopRPM", 2400);
+      new LoggedTunableNumber("/Tuning/Shooter/TopRPM", 2800);
 
   /** Creates a new Shoot. */
   public Shoot(Shooter shooter) {
