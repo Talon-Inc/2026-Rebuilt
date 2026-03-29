@@ -24,7 +24,6 @@ import frc.robot.commands.DriveAimSOTF;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.Shoot;
 import frc.robot.commands.ShootCommand;
-import frc.robot.subsystems.LED;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIONavX;
 import frc.robot.subsystems.drive.ModuleIOSpark;
@@ -50,8 +49,8 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake;
   private final Shooter shooter;
+  @SuppressWarnings("unused")
   private final Vision vision;
-  private final LED led;
 
   // Controller
   private final CommandPS5Controller controller = new CommandPS5Controller(0);
@@ -64,7 +63,6 @@ public class RobotContainer {
     // Subsystems
     intake = new Intake(new IntakeIOReal());
     shooter = new Shooter(new ShooterIOReal());
-    led = new LED();
 
     drive =
         new Drive(
