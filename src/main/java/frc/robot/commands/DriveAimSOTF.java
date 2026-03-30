@@ -17,6 +17,7 @@ import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.ShootingPhysics;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DriveAimSOTF extends Command {
@@ -130,8 +131,11 @@ public class DriveAimSOTF extends Command {
     // 4. Drive
     // Pass Driver x/y, but override rotation with SOTF result
     drive.runVelocity(
-        ChassisSpeeds.fromFieldRelativeSpeeds(
-            driverX, driverY, rotationOutput, drive.getRotation()));
+        ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rotationOutput, drive.getRotation()));
+
+    Pose2d aimGhost =
+        new Pose2d(drive.getPose().getX(), drive.getPose().getY(), solution.robotHeading());
+    Logger.recordOutput("/Shooter/AimGhost", aimGhost);
   }
 
   // Called once the command ends or is interrupted.

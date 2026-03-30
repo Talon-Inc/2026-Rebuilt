@@ -49,6 +49,7 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake;
   private final Shooter shooter;
+
   @SuppressWarnings("unused")
   private final Vision vision;
 
@@ -74,7 +75,9 @@ public class RobotContainer {
 
     vision =
         new Vision(
-            drive::addVisionMeasurement, new VisionIOPhotonVision(camera0Name, robotToCamera0));
+            drive::addVisionMeasurement,
+            new VisionIOPhotonVision(camera0Name, robotToCamera0),
+            new VisionIOPhotonVision(camera1Name, robotToCamera1));
     // new VisionIOPhotonVision(camera1Name, robotToCamera1));
 
     // switch (Constants.currentMode) {
@@ -151,6 +154,10 @@ public class RobotContainer {
         "Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+    // PathPlanner Autos
+    autoChooser.addOption("Simple Back-UpShoot", AutoBuilder.buildAuto("Simple Back-UpShoot"));
+    autoChooser.addOption("SingleSweepAuto", AutoBuilder.buildAuto("SingleSweepAuto"));
 
     // Configure the button bindings
     configureButtonBindings();

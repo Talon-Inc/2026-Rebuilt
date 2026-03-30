@@ -42,7 +42,7 @@ public final class Constants {
     public static final double kIntakeTargetAngle = 110.0; // also used for eject
 
     // PID and feed forward values
-    public static final double kP = 0.003;
+    public static final double kP = 0.0035;
     public static final double kI = 0.0;
     public static final double kD = 0.0;
     public static final double kS = 0.0;

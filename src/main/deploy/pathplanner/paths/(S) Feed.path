@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.28666191155492,
-        "y": 7.017360912981456
+        "x": 7.4678031383737515,
+        "y": 7.10793152639087
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.933594864479315,
-        "y": 6.939728958630529
+        "x": 8.114736091298147,
+        "y": 7.030299572039944
       },
       "isLocked": false,
       "linkedName": "(S)Path1Ending"
@@ -48,7 +48,7 @@
   "folder": "SwipeScore Path",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 120.96375653207346
+    "rotation": 102.33908727832596
   },
   "useDefaultConstraints": true
 }

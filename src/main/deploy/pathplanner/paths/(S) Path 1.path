@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.064935805991441,
-        "y": 7.560784593437946
+        "x": 4.349586305278173,
+        "y": 7.4572753209700435
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.06493580599144,
-        "y": 7.560784593437946
+        "x": 5.349586305278172,
+        "y": 7.4572753209700435
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.28666191155492,
-        "y": 7.017360912981456
+        "x": 7.4678031383737515,
+        "y": 7.10793152639087
       },
       "prevControl": {
-        "x": 6.28666191155492,
-        "y": 7.017360912981456
+        "x": 6.4678031383737515,
+        "y": 7.10793152639087
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 120.96375653207346
+    "rotation": 102.33908727832596
   },
   "reversed": false,
   "folder": "SwipeScore Path",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }
