@@ -4,8 +4,8 @@
 
 package frc.robot.subsystems.shooter;
 
-import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Configs.ShooterConfigs;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.util.LoggedTunableNumber;
 import org.littletonrobotics.junction.Logger;
@@ -14,28 +14,30 @@ public class Shooter extends SubsystemBase {
   private final ShooterIO io;
   private final ShooterIOInputsAutoLogged inputs = new ShooterIOInputsAutoLogged();
 
-  // Flywheel Controllers (These use Bang-Bang bc it's the quickest)
-  // Bang-Bang Controller: If Under speed, Full Power. If over power, 0 power
-  private final BangBangController primaryBang;
-  private final BangBangController secondaryBang;
-
   // Setpoints
-  private double targetPrimaryRPM = 0.0;
-  private double targetSecondaryPRM = 0.0;
+  private double targetTopRPM = 0.0;
+  private double targetBottomRPM = 0.0;
   private double targetKickerRPM = 0.0;
 
   // Tunable Numbers
-  // Flywheel Power (Bang-Bang Voltage)
-  private final LoggedTunableNumber flyVolts =
-      new LoggedTunableNumber("Tuning/Shooter/FlywheelVolts", ShooterConstants.kBangBangVoltage);
+  private final LoggedTunableNumber kP =
+      new LoggedTunableNumber("/Tuning/Shooter/kP", ShooterConstants.kP);
+  private final LoggedTunableNumber kI =
+      new LoggedTunableNumber("/Tuning/Shooter/kI", ShooterConstants.kI);
+  private final LoggedTunableNumber kD =
+      new LoggedTunableNumber("/Tuning/Shooter/kD", ShooterConstants.kD);
+  private final LoggedTunableNumber kSTop =
+      new LoggedTunableNumber("/Tuning/Shooter/kSTop", ShooterConstants.kS[0]);
+  private final LoggedTunableNumber kSBottom =
+      new LoggedTunableNumber("/Tuning/Shooter/kSBottom", ShooterConstants.kS[1]);
+  private final LoggedTunableNumber kVTop =
+      new LoggedTunableNumber("/Tuning/Shooter/kVTop", ShooterConstants.kV[0]);
+  private final LoggedTunableNumber kVBottom =
+      new LoggedTunableNumber("/Tuning/Shooter/kVBottom", ShooterConstants.kV[1]);
 
   /** Creates a new Shooter. */
   public Shooter(ShooterIO io) {
     this.io = io;
-
-    // Initialize Bang-Bang Controllers
-    primaryBang = new BangBangController(ShooterConstants.kFlywheelToleranceRPM);
-    secondaryBang = new BangBangController(ShooterConstants.kFlywheelToleranceRPM);
   }
 
   @Override
@@ -46,88 +48,69 @@ public class Shooter extends SubsystemBase {
     Logger.processInputs("Shooter", inputs);
 
     // Update Tunables (This is for Live Tuning should make tuning faster)
-    // Run Flywheel Logic
-    runFlywheel(primaryBang, inputs.primaryLeaderRPM, targetPrimaryRPM, true, flyVolts.get());
-
-    if (ShooterConstants.kIsDoubleFlywheel) {
-      runFlywheel(
-          secondaryBang, inputs.secondaryLeaderRPM, targetSecondaryPRM, false, flyVolts.get());
+    if (kP.hasChanged()
+        || kI.hasChanged()
+        || kD.hasChanged()
+        || kSTop.hasChanged()
+        || kSBottom.hasChanged()
+        || kVTop.hasChanged()
+        || kVBottom.hasChanged()) {
+      io.updatePID(
+          io.getTopMotor(),
+          ShooterConfigs.topConfig,
+          kP.get(),
+          kI.get(),
+          kD.get(),
+          kSTop.get(),
+          kVTop.get());
+      io.updatePID(
+          io.getBottomMotor(),
+          ShooterConfigs.bottomConfig,
+          kP.get(),
+          kI.get(),
+          kD.get(),
+          kSBottom.get(),
+          kVBottom.get());
     }
+
+    io.setTopRPM(targetTopRPM);
+    io.setBottomRPM(targetBottomRPM);
 
     // Log Goals
-    Logger.recordOutput("Shooter/Goal/PrimaryRPM", targetPrimaryRPM);
-    Logger.recordOutput("Shooter/Goal/SecondaryRPM", targetSecondaryPRM);
+    Logger.recordOutput("Shooter/Goal/TopRPM", targetTopRPM);
+    Logger.recordOutput("Shooter/Goal/BottomRPM", targetBottomRPM);
     Logger.recordOutput("Shooter/Goal/KickerRPM", targetKickerRPM);
-  }
-
-  // Core Bang-Bang Logic
-  private void runFlywheel(
-      BangBangController controller,
-      double currentRPM,
-      double target,
-      boolean isPrimary,
-      double voltageToUse) {
-    // Only run if we actualy have a target (avoids jitter at 0 RPM)
-    if (target > 50.0) {
-      // .calculate() returns 1.0 if we need speed, 0.0 if we don't
-      double demand = controller.calculate(currentRPM, target);
-
-      // Multiply by Max Voltage (12V)
-      double volts = demand * voltageToUse;
-
-      if (isPrimary) io.setPrimaryVolts(volts);
-      else io.setSecondaryVolts(volts);
-      io.setPrimaryVolts(volts);
-    } else {
-      // Idle Mode
-      if (isPrimary) io.setPrimaryVolts(0.0);
-      else io.setSecondaryVolts(0.0);
-      io.setPrimaryVolts(0.0);
-    }
   }
 
   // --- Commands ---
 
-  // Set the main target speed
-  // If double Flywheel is enabled, this sets BOTH to the same speed
+  // Run kicker (wheels that feed into the shooter)
+  public void setKickerSpeed(double speed) {
+    io.setKickerSpeed(speed);
+  }
+
+  // This will set rollers to the exact same speeds (Natural Backspin)
   public void setTargetSpeed(double rpm) {
-    this.targetPrimaryRPM = rpm;
-    if (ShooterConstants.kIsDoubleFlywheel) {
-      this.targetSecondaryPRM = rpm;
-    }
+    this.targetTopRPM = rpm;
+    this.targetBottomRPM = rpm;
   }
 
   // Sets different speeds for Top and Bottom Rollers
   // This is useful  for controlling spin (backspin/topspin)
-  public void setSplitSpeeds(double primaryRPM, double secondaryRPM) {
-    this.targetPrimaryRPM = primaryRPM;
-    this.targetSecondaryPRM = secondaryRPM;
+  public void setSplitSpeeds(double topRPM, double bottomRPM) {
+    this.targetTopRPM = topRPM;
+    this.targetBottomRPM = bottomRPM;
   }
 
   /**
    * @return True if flywheels are within tolerance of target
    */
   public boolean isAtSpeed() {
-    boolean primaryReady =
-        Math.abs(inputs.primaryLeaderRPM - targetPrimaryRPM)
-            < ShooterConstants.kFlywheelToleranceRPM;
+    boolean topReady =
+        Math.abs(inputs.topRPM - targetTopRPM) < ShooterConstants.kFlywheelToleranceRPM;
+    boolean bottomReady =
+        Math.abs(inputs.bottomRPM - targetBottomRPM) < ShooterConstants.kFlywheelToleranceRPM;
 
-    if (ShooterConstants.kIsDoubleFlywheel) {
-      boolean secondaryReady =
-          Math.abs(inputs.secondaryLeaderRPM = targetSecondaryPRM)
-              < ShooterConstants.kFlywheelToleranceRPM;
-      return primaryReady && secondaryReady;
-    }
-
-    return primaryReady;
-  }
-
-  // kicker (wheels that feed into the shooter)
-  public void setKickerSpeed(double speed) {
-    io.setKickerSpeed(speed);
-  }
-
-  public void setMotorVoltage(double voltage) {
-    io.setPrimaryVolts(voltage);
+    return topReady && bottomReady;
   }
 }

@@ -90,7 +90,7 @@ public class Drive extends SubsystemBase {
         this::getChassisSpeeds,
         this::runVelocity,
         new PPHolonomicDriveController(
-            new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
+            new PIDConstants(0.3, 0.0, 0.0), new PIDConstants(5.5, 0.0, 0.0)),
         ppConfig,
         () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
         this);
@@ -197,6 +197,23 @@ public class Drive extends SubsystemBase {
 
     // Log optimized setpoints (runSetpoint mutates each state)
     Logger.recordOutput("SwerveStates/SetpointsOptimized", setpointStates);
+  }
+
+  // Returns the current velocit of the robot relative to the field.
+  public ChassisSpeeds getFieldRelativeSpeeds() {
+    // Get raw states from modules (Angle + Velocity)
+    SwerveModuleState[] currentStates = new SwerveModuleState[4];
+
+    for (int i = 0; i < 4; i++) {
+      currentStates[i] = modules[i].getState();
+    }
+
+    // Convert to Robot-relative ChassisSpeeds (Forward/Strafe/Turn)
+    ChassisSpeeds robotRelative = kinematics.toChassisSpeeds(currentStates);
+
+    // Convert to Field-Relative using the Gyro
+    // This Rotates the vector so X aligns wiith the field's X axis
+    return ChassisSpeeds.fromFieldRelativeSpeeds(robotRelative, getRotation());
   }
 
   /** Runs the drive in a straight line with the specified drive output. */

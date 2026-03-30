@@ -6,23 +6,28 @@ package frc.robot.subsystems.shooter;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkBaseConfig;
 import frc.robot.Configs.ShooterConfigs;
 import frc.robot.Constants.ShooterConstants;
 
 public class ShooterIOReal implements ShooterIO {
-  // Kicker motor
+  // Kicker Motor
   private final SparkMax kicker;
 
-  // Primary Set
-  private final SparkFlex primaryLeader;
-  private final SparkFlex primaryFollower;
+  // Shooter Motors
+  private final SparkFlex topMotor;
+  private final SparkFlex bottomMotor;
 
-  // Secondary Set (Optional)
-  // private final SparkFlex secondaryLeader;
-  // private final SparkFlex secondaryFollower;
+  // ClosedLoopControllers
+  private final SparkClosedLoopController topController;
+  private final SparkClosedLoopController bottomController;
 
   public ShooterIOReal() {
     // --- 1. Kicker Setup ---
@@ -34,72 +39,57 @@ public class ShooterIOReal implements ShooterIO {
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    // --- 2. Primary Flywheel Setup ---
-    primaryLeader = new SparkFlex(ShooterConstants.kPrimaryLeaderId, MotorType.kBrushless);
-    primaryFollower = new SparkFlex(ShooterConstants.kPrimaryFollowerId, MotorType.kBrushless);
+    // --- 2. Motor Setup ---
+    topMotor = new SparkFlex(ShooterConstants.kTopMotorId, MotorType.kBrushless);
+    bottomMotor = new SparkFlex(ShooterConstants.kBottomMotorId, MotorType.kBrushless);
 
-    // Configure Leader
-    primaryLeader.configure(
-        ShooterConfigs.leaderConfig,
+    // Configure Motors
+    topMotor.configure(
+        ShooterConfigs.topConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+    bottomMotor.configure(
+        ShooterConfigs.bottomConfig,
         ResetMode.kResetSafeParameters,
         PersistMode.kPersistParameters);
 
-    // Configure Follower (Follows Leader)
-    ShooterConfigs.followerConfig.follow(primaryLeader, true);
-    primaryFollower.configure(
-        ShooterConfigs.followerConfig,
-        ResetMode.kResetSafeParameters,
-        PersistMode.kPersistParameters);
+    // --- 3. Controller Setup ---
+    topController = topMotor.getClosedLoopController();
+    bottomController = bottomMotor.getClosedLoopController();
+  }
 
-    // // --- 3. Secondary Flywheel Setup ---
-    // if (ShooterConstants.kIsDoubleFlywheel) {
-    //   secondaryLeader = new SparkFlex(ShooterConstants.kSecondaryLeaderId, MotorType.kBrushless);
-    //   secondaryFollower =
-    //       new SparkFlex(ShooterConstants.kSecondaryFollowerId, MotorType.kBrushless);
+  /**
+   * @return the top shooter motor
+   */
+  @Override
+  public SparkBase getTopMotor() {
+    return topMotor;
+  }
 
-    //   secondaryLeader.configure(
-    //       ShooterConfigs.leaderConfig,
-    //       ResetMode.kResetSafeParameters,
-    //       PersistMode.kPersistParameters);
-
-    //   ShooterConfigs.followerConfig.follow(secondaryLeader, true);
-    //   secondaryFollower.configure(
-    //       ShooterConfigs.followerConfig,
-    //       ResetMode.kResetSafeParameters,
-    //       PersistMode.kPersistParameters);
-    // } else {
-    //   secondaryLeader = null;
-    //   secondaryFollower = null;
-    // }
+  /**
+   * @return the bottom shooter motor
+   */
+  @Override
+  public SparkBase getBottomMotor() {
+    return bottomMotor;
   }
 
   // -- LOGIC --
 
-  // Update Inputs functions as a way to update the Values in the Logging framework from the REAL
-  // sensor values
+  /**
+   * Update Inputs functions as a way to update the Values in the Logging framework from the REAL
+   * sensor values
+   *
+   * <p>inputs.[value name] sets the value for the variables you created in ShooterIO
+   */
   @Override
   public void updateInputs(ShooterIOInputs inputs) {
-    // Primary Flywheel
-    // inputs.[value name] sets the value for the variables you created in ShooterIO
-    inputs.primaryLeaderRPM = primaryLeader.getEncoder().getVelocity();
-    inputs.primaryLeaderVolts = primaryLeader.getAppliedOutput() * primaryFollower.getBusVoltage();
-    inputs.primaryLeaderAmps = new double[] {primaryFollower.getOutputCurrent()};
+    inputs.topRPM = topMotor.getEncoder().getVelocity();
+    inputs.topVolts = topMotor.getAppliedOutput() * topMotor.getBusVoltage();
+    inputs.topAmps = new double[] {topMotor.getOutputCurrent()};
 
-    inputs.primaryFollowerVolts =
-        primaryFollower.getAppliedOutput() * primaryFollower.getBusVoltage();
-    inputs.primaryFollowerAmps = new double[] {primaryFollower.getOutputCurrent()};
-
-    // // Secondary Flywheel
-    // if (secondaryLeader != null) {
-    //   inputs.secondaryLeaderRPM = secondaryLeader.getEncoder().getVelocity();
-    //   inputs.secondaryLeaderVolts =
-    //       secondaryLeader.getAppliedOutput() * secondaryLeader.getBusVoltage();
-    //   inputs.secondaryLeaderAmps = new double[] {secondaryFollower.getOutputCurrent()};
-
-    //   inputs.secondaryFollowerVolts =
-    //       secondaryFollower.getAppliedOutput() * secondaryFollower.getBusVoltage();
-    //   inputs.secondaryFollowerAmps = new double[] {secondaryFollower.getOutputCurrent()};
-    // }
+    inputs.bottomRPM = bottomMotor.getEncoder().getVelocity();
+    inputs.bottomVolts = bottomMotor.getAppliedOutput() * bottomMotor.getBusVoltage();
+    inputs.bottomAmps = new double[] {bottomMotor.getOutputCurrent()};
   }
 
   @Override
@@ -108,12 +98,34 @@ public class ShooterIOReal implements ShooterIO {
   }
 
   @Override
-  public void setPrimaryVolts(double volts) {
-    primaryLeader.setVoltage(volts);
+  public void setTopRPM(double rpm) {
+    topController.setSetpoint(rpm, ControlType.kVelocity);
   }
 
-  // @Override
-  // public void setSecondaryVolts(double volts) {
-  //   secondaryLeader.setVoltage(volts);
-  // }
+  @Override
+  public void setBottomRPM(double rpm) {
+    bottomController.setSetpoint(rpm, ControlType.kVelocity);
+  }
+
+  @Override
+  public void updatePID(
+      SparkBase motor,
+      SparkBaseConfig config,
+      double kP,
+      double kI,
+      double kD,
+      double kS,
+      double kV) {
+    config
+        .closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .p(kP)
+        .i(kI)
+        .d(kD)
+        .feedForward
+        .kS(kS)
+        .kV(kV);
+
+    motor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+  }
 }

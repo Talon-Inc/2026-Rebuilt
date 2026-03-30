@@ -10,29 +10,32 @@ package frc.robot;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import frc.robot.commands.Agitate;
-import frc.robot.commands.DeployIntake;
 import frc.robot.commands.DriveAimSOTF;
 import frc.robot.commands.DriveCommands;
-import frc.robot.commands.IntakeFuel;
-import frc.robot.commands.MoveIntake;
 import frc.robot.commands.Shoot;
 import frc.robot.commands.ShootCommand;
-import frc.robot.subsystems.LED;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.subsystems.drive.GyroIONavX;
 import frc.robot.subsystems.drive.ModuleIOSpark;
 import frc.robot.subsystems.intake.Intake;
+import frc.robot.subsystems.intake.Intake.IntakeState;
+import frc.robot.subsystems.intake.IntakeIOReal;
 import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.subsystems.shooter.ShooterIOReal;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOPhotonVision;
+import frc.robot.util.AllianceFlipUtil;
+import frc.robot.util.ShootingPhysics.ShotType;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -46,24 +49,12 @@ public class RobotContainer {
   private final Drive drive;
   private final Intake intake;
   private final Shooter shooter;
+
+  @SuppressWarnings("unused")
   private final Vision vision;
-  private final LED led;
-
-  // Commands
-  // Intake Commands
-  private final DeployIntake deployIntake;
-  private final MoveIntake mIntakeDeploy;
-  private final MoveIntake mIntakeUndeploy;
-  private final IntakeFuel intakeFuel;
-  private final Agitate agitate;
-
-  // Shooter Commands
-  private final DriveAimSOTF shootOnFly;
-  private final ShootCommand shootCommand;
-  private final Shoot shoot;
 
   // Controller
-  private final CommandXboxController controller = new CommandXboxController(0);
+  private final CommandPS5Controller controller = new CommandPS5Controller(0);
 
   // Dashboard inputs
   private final LoggedDashboardChooser<Command> autoChooser;
@@ -71,9 +62,8 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Subsystems
-    intake = new Intake();
+    intake = new Intake(new IntakeIOReal());
     shooter = new Shooter(new ShooterIOReal());
-    led = new LED();
 
     drive =
         new Drive(
@@ -88,23 +78,8 @@ public class RobotContainer {
             drive::addVisionMeasurement,
             new VisionIOPhotonVision(camera0Name, robotToCamera0),
             new VisionIOPhotonVision(camera1Name, robotToCamera1));
+    // new VisionIOPhotonVision(camera1Name, robotToCamera1));
 
-    // Commands
-    // Intake Commands
-    // 30 RPM is about 0.5 rotations per second
-    deployIntake = new DeployIntake(intake, 0.1);
-    mIntakeDeploy = new MoveIntake(intake, 0.1);
-    mIntakeUndeploy = new MoveIntake(intake, -0.1);
-    intakeFuel = new IntakeFuel(intake);
-    agitate = new Agitate(intake, 0.1);
-
-    // Shooter Commands
-    shootOnFly =
-        new DriveAimSOTF(
-            drive, shooter, null, () -> -controller.getLeftY(), () -> -controller.getLeftX());
-
-    shootCommand = new ShootCommand(shooter, drive, Constants.FieldConstants.Goals.blueHub);
-    shoot = new Shoot(shooter);
     // switch (Constants.currentMode) {
     //   case REAL:
     //     // Real robot, instantiate hardware IO implementations
@@ -140,6 +115,27 @@ public class RobotContainer {
     //     break;
     // }
 
+    // Setup Commands for Pathplanner
+    NamedCommands.registerCommand(
+        "Intake", Commands.runOnce(() -> intake.setState(IntakeState.INTAKE)));
+    NamedCommands.registerCommand(
+        "Stow", Commands.runOnce(() -> intake.setState(IntakeState.STOW)));
+    NamedCommands.registerCommand(
+        "AutoShoot",
+        new ShootCommand(
+            shooter,
+            drive,
+            intake,
+            () -> AllianceFlipUtil.apply(Constants.FieldConstants.Goals.blueHub),
+            ShotType.SCORE));
+    NamedCommands.registerCommand(
+        "AlignRotation",
+        new DriveAimSOTF(
+            drive,
+            () -> AllianceFlipUtil.apply(Constants.FieldConstants.Goals.blueHub),
+            () -> -controller.getLeftX(),
+            () -> -controller.getLeftY(),
+            ShotType.SCORE));
     // Set up auto routines
     autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
 
@@ -159,8 +155,28 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    // PathPlanner Autos
+    autoChooser.addOption("Simple Back-UpShoot", AutoBuilder.buildAuto("Simple Back-UpShoot"));
+    autoChooser.addOption("SingleSweepAuto", AutoBuilder.buildAuto("SingleSweepAuto"));
+
     // Configure the button bindings
     configureButtonBindings();
+  }
+
+  // Selects whether to pass to the left or right gap based on robot's Y position
+  private Translation2d getSmartPassTarget() {
+    Pose2d currentPose = drive.getPose();
+    double fieldCenterY = Constants.FieldConstants.fieldWidth / 2.0;
+
+    Translation2d baseTarget;
+
+    if (currentPose.getY() > fieldCenterY) {
+      baseTarget = Constants.FieldConstants.bluePassLeft;
+    } else {
+      baseTarget = Constants.FieldConstants.bluePassRight;
+    }
+
+    return AllianceFlipUtil.apply(baseTarget);
   }
 
   /**
@@ -179,28 +195,28 @@ public class RobotContainer {
             () -> -controller.getRightX()));
 
     // Lock to 0° when A button is held
-    // controller
-    //     .a()
-    //     .whileTrue(
-    //         DriveCommands.joystickDriveAtAngle(
-    //             drive,
-    //             () -> -controller.getLeftY(),
-    //             () -> -controller.getLeftX(),
-    //             () -> Rotation2d.kZero));
+    controller
+        .square()
+        .whileTrue(
+            DriveCommands.joystickDriveAtAngle(
+                drive,
+                () -> -controller.getLeftY(),
+                () -> -controller.getLeftX(),
+                () -> Rotation2d.kZero));
 
     // Switch to X pattern when X button is pressed
-    controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+    controller.cross().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
     // Reset gyro to 0° when B button is pressed
-    // controller
-    //     .b()
-    //     .onTrue(
-    //         Commands.runOnce(
-    //                 () ->
-    //                     drive.setPose(
-    //                         new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
-    //                 drive)
-    //             .ignoringDisable(true));
+    controller
+        .circle()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        drive.setPose(
+                            new Pose2d(drive.getPose().getTranslation(), Rotation2d.kZero)),
+                    drive)
+                .ignoringDisable(true));
 
     // controller
     //     .y()
@@ -213,12 +229,71 @@ public class RobotContainer {
     //                 intake.stopIntake()));
     // Shooter Buttons
     // controller.rightTrigger(.5).whileTrue(shoot);
-    controller.rightTrigger().whileTrue(shoot);
-    // intake buttons
-    controller.leftTrigger().whileTrue(intakeFuel);
-    controller.y().whileTrue(intake.deployCommand(0.1));
-    controller.a().whileTrue(intake.deployCommand(-0.1));
-    controller.b().whileTrue(agitate);
+
+    // --INTAKE--
+    // Hold L1 to intake and when you release it automatically Stows
+    // controller
+    //     .povDown()
+    //     .onTrue(Commands.runOnce(() -> intake.setState(IntakeState.INTAKE)))
+    //     .onFalse(Commands.runOnce(() -> intake.setState(IntakeState.STOW)));
+    controller
+        .povDown()
+        .onTrue(
+            Commands.runOnce(
+                () -> {
+                  if (intake.getState() == IntakeState.INTAKE) {
+                    intake.setState(IntakeState.STOW);
+                  } else {
+                    intake.setState(IntakeState.INTAKE);
+                  }
+                }));
+
+    // -- DEFAULT Scoring Buttons --
+
+    // Left Trigger: Aim at Hub
+    controller
+        .L2()
+        .whileTrue(
+            new DriveAimSOTF(
+                drive,
+                () -> AllianceFlipUtil.apply(Constants.FieldConstants.Goals.blueHub),
+                () -> -controller.getLeftX(),
+                () -> -controller.getLeftY(),
+                ShotType.SCORE));
+
+    // Right Bumper: Fire to Score
+    controller
+        .R2()
+        .whileTrue(
+            new ShootCommand(
+                shooter,
+                drive,
+                intake,
+                () -> AllianceFlipUtil.apply(Constants.FieldConstants.Goals.blueHub),
+                ShotType.SCORE));
+
+    // -- Passing Shots --
+
+    // Left Trigger + POV Left (Aim to the closest gap)
+    controller
+        .L2()
+        .and(controller.povLeft())
+        .whileTrue(
+            new DriveAimSOTF(
+                drive,
+                () -> getSmartPassTarget(),
+                () -> -controller.getLeftX(),
+                () -> -controller.getLeftY(),
+                ShotType.PASS));
+
+    // Right Bumper + POV Left (Fire to Pass)
+    controller
+        .R2()
+        .and(controller.povLeft())
+        .whileTrue(
+            new ShootCommand(shooter, drive, intake, () -> getSmartPassTarget(), ShotType.PASS));
+
+    controller.R1().whileTrue(new Shoot(shooter));
   }
 
   /**

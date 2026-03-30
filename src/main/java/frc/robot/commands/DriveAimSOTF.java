@@ -7,64 +7,65 @@ package frc.robot.commands;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.shooter.Shooter;
 import frc.robot.util.LoggedTunableNumber;
 import frc.robot.util.ShootingPhysics;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.Logger;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DriveAimSOTF extends Command {
   private final Drive drive;
-  private final Shooter shooter;
   private final Supplier<Translation2d> targetSupplier;
   private final DoubleSupplier xInput;
   private final DoubleSupplier yInput;
+  private final ShootingPhysics.ShotType shotType;
 
   private final ProfiledPIDController turnController;
 
   // Tunable Numbers
   private static final LoggedTunableNumber turnkP =
-      new LoggedTunableNumber("Tuning/DriveAim/kP", 5.0);
+      new LoggedTunableNumber("/Tuning/DriveAim/kP", 5.0);
   private static final LoggedTunableNumber turnKi =
-      new LoggedTunableNumber("Tuning/DriveAim/kI", 0.0);
+      new LoggedTunableNumber("/Tuning/DriveAim/kI", 0.0);
   private static final LoggedTunableNumber turnKd =
-      new LoggedTunableNumber("Tuning/DriveAim/kD", 0.0);
-
+      new LoggedTunableNumber("/Tuning/DriveAim/kD", 0.0);
   private static final LoggedTunableNumber speedLimit =
       new LoggedTunableNumber("Tuning/DriveAim/MaxSpeed", 4.5);
 
   // This limits the velocity of the driver (x & y)
   // Remember max MAGNITUDE is 4.8m/s
-  // private static final InterpolatingDoubleTreeMap maxTranslationSpeedMap =
-  //     new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap maxTranslationSpeedMap =
+      new InterpolatingDoubleTreeMap();
 
   static {
     // Key: meters, Value: m/s
-    // maxTranslationSpeedMap.put(null, null);
+    maxTranslationSpeedMap.put(1.0, .5);
+    maxTranslationSpeedMap.put(5.0, .5);
   }
 
   /** Creates a new DriveAimSOTF. */
   public DriveAimSOTF(
       Drive drive,
-      Shooter shooter,
       Supplier<Translation2d> target,
       DoubleSupplier xInput,
-      DoubleSupplier yInput) {
+      DoubleSupplier yInput,
+      ShootingPhysics.ShotType type) {
     // Use addRequirements() here to declare subsystem dependencies.
 
     this.drive = drive;
-    this.shooter = shooter;
     this.targetSupplier = target;
     this.xInput = xInput;
     this.yInput = yInput;
+    this.shotType = type;
 
-    addRequirements(drive, shooter);
+    addRequirements(drive);
 
     turnController =
         new ProfiledPIDController(
@@ -95,7 +96,13 @@ public class DriveAimSOTF extends Command {
         ChassisSpeeds.fromFieldRelativeSpeeds(drive.getChassisSpeeds(), drive.getRotation());
 
     // 2. Calculate SOTF solution
-    var solution = ShootingPhysics.calculateShot(robotPose, fieldSpeeds, targetSupplier.get());
+    ShootingPhysics.ShootSolution solution;
+
+    if (this.shotType == ShootingPhysics.ShotType.SCORE) {
+      solution = ShootingPhysics.calculateShot(robotPose, fieldSpeeds, targetSupplier.get());
+    } else {
+      solution = ShootingPhysics.calculatePass(robotPose, fieldSpeeds, targetSupplier.get());
+    }
 
     // 3. Calculate Turn Output
     double rotationOutput =
@@ -110,25 +117,25 @@ public class DriveAimSOTF extends Command {
     double currentDistance = targetSupplier.get().getDistance(robotPose.getTranslation());
 
     // Get the speed limit
-    double maxAllowedSpeed = 1; // maxTranslationSpeedMap.get(currentDistance);
+    double maxAllowedSpeed = maxTranslationSpeedMap.get(currentDistance);
 
-    // Get where the dirver wants to go
+    // Get where the driver wants to go
     double requestedSpeed = Math.hypot(driverX, driverY);
 
-    // Scale it down so the roobot can turn
+    // Scale it down so the robot can turn
     if (requestedSpeed > maxAllowedSpeed) {
       driverX = (driverX / requestedSpeed) * maxAllowedSpeed;
       driverY = (driverY / requestedSpeed) * maxAllowedSpeed;
     }
 
     // 4. Drive
-    // Pass Driver X/y, but overridr rotation with SOTF result
+    // Pass Driver x/y, but override rotation with SOTF result
     drive.runVelocity(
-        ChassisSpeeds.fromFieldRelativeSpeeds(
-            driverX, driverY, rotationOutput, drive.getRotation()));
+        ChassisSpeeds.fromFieldRelativeSpeeds(0, 0, rotationOutput, drive.getRotation()));
 
-    // 5. Set Shooter Speed
-    shooter.setSplitSpeeds(solution.bottomRPM(), solution.topRPM());
+    Pose2d aimGhost =
+        new Pose2d(drive.getPose().getX(), drive.getPose().getY(), solution.robotHeading());
+    Logger.recordOutput("/Shooter/AimGhost", aimGhost);
   }
 
   // Called once the command ends or is interrupted.

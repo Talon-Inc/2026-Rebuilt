@@ -31,53 +31,61 @@ public final class Constants {
     REPLAY
   }
 
-  public static final class DriveConstants {
-    public static final double kMaxSpeedMetersPerSecond = 4.8;
-  }
-
   public static final class IntakeConstants {
-    // Intake motor confugurations
+    // Intake IDs
     public static final int kDeployMotorId = 11;
     public static final int kIntakeMotorId = 12;
+
+    public static final double kStartAngle = 204.0;
+    public static final double kStowTargetAngle = 26.0;
+    public static final double kPrepTargetAngle = 50.0;
+    public static final double kIntakeTargetAngle = 110.0; // also used for eject
+
+    // PID and feed forward values
+    public static final double kP = 0.0035;
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+    public static final double kS = 0.0;
+    public static final double kV = 0.0;
+    public static final double kG = -0.7;
   }
 
   public static final class ShooterConstants {
-    public static final double kFixedPitchDegrees = 0;
-
-    // --- Configuration Flags ---
-    public static final boolean kHasHood = true;
-    public static final boolean kIsDoubleFlywheel = true; // Set TRUE for Top/Bottom shooter
-    public static final boolean kHasDualHoods = true;
-
     // --- Device IDs ---
-    // Kicker
+    // Kicker ID
     public static final int kKickerId = 13;
 
-    // Primary Flywheel (e.g. Bottom Roller) - 2 Motors
-    public static final int kPrimaryLeaderId = 14;
-    public static final int kPrimaryFollowerId = 15;
+    // Shooter IDs
+    public static final int kTopMotorId = 14;
+    public static final int kBottomMotorId = 15;
 
-    // Secondary Flywheel (e.g. Top Roller) - 2 Motors
-    public static final int kSecondaryLeaderId = 16;
-    public static final int kSecondaryFollowerId = 17;
+    // --- Flywheel Constants ---
+    public static final double kFlywheelToleranceRPM = 200.0;
+    public static final boolean kTopInverted = true;
 
-    // --- Flywheel Constants (Bang-Bang) ---
-    public static final double kFlywheelToleranceRPM = 50.0;
-    public static final double kMaxRPM = 5700.0;
-    public static final double kBangBangVoltage = 12.0;
+    // PID and feed forward values, if applicable [top, bottom]
+    public static final double kP = 0.000325;
+    public static final double kI = 0.0;
+    public static final double kD = 0.015;
+    public static final double[] kS = {0.1425, 0.112};
+    public static final double[] kV = {0.00175, 0.00175};
   }
 
   public static final class FieldConstants {
     public static final double fieldLength = Units.inchesToMeters(651.22);
     public static final double fieldWidth = Units.inchesToMeters(317.69);
-    public static final Translation2d hubTranslation =
-        new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
 
+    // Passing Gaps
+    public static final Translation2d bluePassLeft = new Translation2d(3.0, 6.5);
+    public static final Translation2d bluePassRight = new Translation2d(3.0, 1.5);
+
+    // Bottom left of field is (0, 0)
     public static final class Goals {
       public static final Translation2d blueHub =
           new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
       public static final Translation2d redHub =
-          new Translation2d(Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
+          new Translation2d(
+              fieldLength - Units.inchesToMeters(182.11), Units.inchesToMeters(158.84));
     }
   }
 }

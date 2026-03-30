@@ -6,40 +6,62 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-// import frc.robot.Constants.ShooterConstants;
 
 public class ShootingPhysics {
+  private static final double hubDist = Units.inchesToMeters(24.0 / 2);
+  private static final double robotDist =
+      Units.inchesToMeters(27.5 / 2) + Units.inchesToMeters(3.5);
 
   // Key: Distance (m), Value: Time of Flight (s)
   private static final InterpolatingDoubleTreeMap timeOfFlightMap =
       new InterpolatingDoubleTreeMap();
 
   // Key: Distance (m), Value: RPM
-  private static final InterpolatingDoubleTreeMap rpmMap = new InterpolatingDoubleTreeMap();
-
-  // Key: Distance (m), Value: Hood Angle (Degrees)
-  private static final InterpolatingDoubleTreeMap hoodMap = new InterpolatingDoubleTreeMap();
-
+  private static final InterpolatingDoubleTreeMap topRPMMap = new InterpolatingDoubleTreeMap();
   private static final InterpolatingDoubleTreeMap bottomRPMMap = new InterpolatingDoubleTreeMap();
 
-  private static final InterpolatingDoubleTreeMap topRPMMap = new InterpolatingDoubleTreeMap();
+  // PASSING MAPS
+  private static final InterpolatingDoubleTreeMap passTimeOfFlightMap =
+      new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap passTopRPM = new InterpolatingDoubleTreeMap();
+  private static final InterpolatingDoubleTreeMap passBottomRPM = new InterpolatingDoubleTreeMap();
 
   static {
     // The More the data you put the more accurate it's going to be
     // But don't put too much
-
+    // Scoring Data
     // Time of flight (this can be tuned by recording in slo-mo)
-    timeOfFlightMap.put(null, null);
+    timeOfFlightMap.put(1.0, 0.2);
+    timeOfFlightMap.put(5.0, 1.0);
 
-    // RPM
-    rpmMap.put(null, null);
+    // Key: Distance(m), Value: RPM
+    topRPMMap.put(Units.feetToMeters(6 + robotDist + hubDist), 2450.0);
+    topRPMMap.put(Units.feetToMeters(7 + robotDist + hubDist), 2550.0);
+    topRPMMap.put(Units.feetToMeters(8 + robotDist + hubDist), 2600.0);
+    topRPMMap.put(Units.feetToMeters(11 + robotDist + hubDist), 2800.0);
+    topRPMMap.put(Units.feetToMeters(15 + robotDist + hubDist), 3150.0);
 
-    // Hood Angle
-    hoodMap.put(null, null);
+    // Key: Distance(m), Value: RPM
+    bottomRPMMap.put(Units.feetToMeters(6 + robotDist + hubDist), 2450.0);
+    bottomRPMMap.put(Units.feetToMeters(7 + robotDist + hubDist), 2550.0);
+    bottomRPMMap.put(Units.feetToMeters(8 + robotDist + hubDist), 2600.0);
+    bottomRPMMap.put(Units.feetToMeters(11 + robotDist + hubDist), 2800.0);
+    bottomRPMMap.put(Units.feetToMeters(15 + robotDist + hubDist), 3150.0);
 
-    bottomRPMMap.put(2.0, 600.0);
+    // Passing Data
+    passTimeOfFlightMap.put(2.0, 0.4);
+    passTimeOfFlightMap.put(8.0, 1.2);
 
-    topRPMMap.put(2.0, 600.0);
+    passTopRPM.put(2.0, 1000.0);
+    passTopRPM.put(8.0, 2000.0);
+
+    passBottomRPM.put(2.0, 2000.0);
+    passBottomRPM.put(8.0, 4000.0);
+  }
+
+  public enum ShotType {
+    SCORE,
+    PASS
   }
 
   public record ShootSolution(
@@ -54,7 +76,7 @@ public class ShootingPhysics {
    * - V_robot/ground" * @param currentPose Current robot pose (from Odometry/Vision)
    *
    * @param fieldRelativeSpeeds Current robot velocity (Field Relative!)
-   * @param targetLocation Location of the goal (Speaker)
+   * @param targetLocation Location of the goal (Hub)
    * @return ShotSolution containing the field-relative angle and the necessary shooter speed
    */
   public static ShootSolution calculateShot(
@@ -100,7 +122,35 @@ public class ShootingPhysics {
     return new ShootSolution(targetHeading, topRPM, bottomRPM, effectiveDistance);
   }
 
-  // ***DISCLAIMER**
+  // Calculate Pass
+  public static ShootSolution calculatePass(
+      Pose2d currentPose, ChassisSpeeds fieldRelativeSpeeds, Translation2d targetLocation) {
+    double currentDistance = targetLocation.getDistance(currentPose.getTranslation());
+    double timeOfFlight = 0.0;
+    Translation2d virtualGoalLocation = targetLocation;
+    double effectiveDistance = currentDistance;
+
+    for (int i = 0; i < 5; i++) {
+      timeOfFlight = passTimeOfFlightMap.get(effectiveDistance);
+      double virtualGoalX =
+          targetLocation.getX() - (fieldRelativeSpeeds.vxMetersPerSecond * timeOfFlight);
+      double virtualGoalY =
+          targetLocation.getY() - (fieldRelativeSpeeds.vyMetersPerSecond * timeOfFlight);
+
+      virtualGoalLocation = new Translation2d(virtualGoalX, virtualGoalY);
+      effectiveDistance = virtualGoalLocation.getDistance(currentPose.getTranslation());
+    }
+
+    Rotation2d targetHeading = virtualGoalLocation.minus(currentPose.getTranslation()).getAngle();
+
+    return new ShootSolution(
+        targetHeading,
+        passTopRPM.get(effectiveDistance),
+        passBottomRPM.get(effectiveDistance),
+        effectiveDistance);
+  }
+
+  // ***DISCLAIMER***
   // THESE ARE OLD CODE; it was used to calculate SOTF using Vectors * latency
   // Mock Lookup Table: Distance (m) -> Horizontal Velocity (m/s)
   @SuppressWarnings("unused")
