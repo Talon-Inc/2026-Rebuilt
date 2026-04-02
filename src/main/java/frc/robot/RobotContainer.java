@@ -78,7 +78,6 @@ public class RobotContainer {
             drive::addVisionMeasurement,
             new VisionIOPhotonVision(camera0Name, robotToCamera0),
             new VisionIOPhotonVision(camera1Name, robotToCamera1));
-    // new VisionIOPhotonVision(camera1Name, robotToCamera1));
 
     // switch (Constants.currentMode) {
     //   case REAL:
@@ -218,24 +217,8 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    // controller
-    //     .y()
-    //     .toggleOnTrue(
-    //         Commands.run(
-    //             () ->
-    //                 intake.runIntake(1))
-    //         Commands.stop(
-    //             () ->
-    //                 intake.stopIntake()));
-    // Shooter Buttons
-    // controller.rightTrigger(.5).whileTrue(shoot);
-
     // --INTAKE--
-    // Hold L1 to intake and when you release it automatically Stows
-    // controller
-    //     .povDown()
-    //     .onTrue(Commands.runOnce(() -> intake.setState(IntakeState.INTAKE)))
-    //     .onFalse(Commands.runOnce(() -> intake.setState(IntakeState.STOW)));
+    // Use D-pad down to toggle between STOW and INTAKE
     controller
         .povDown()
         .onTrue(
@@ -249,7 +232,7 @@ public class RobotContainer {
                 }));
 
     // -- DEFAULT Scoring Buttons --
-
+    
     // Left Trigger: Aim at Hub
     controller
         .L2()
@@ -261,7 +244,7 @@ public class RobotContainer {
                 () -> -controller.getLeftY(),
                 ShotType.SCORE));
 
-    // Right Bumper: Fire to Score
+    // Right Trigger: Fire to Score
     controller
         .R2()
         .whileTrue(
