@@ -9,6 +9,7 @@ package frc.robot.subsystems.drive;
 
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.drive.DriveConstants.*;
+import edu.wpi.first.math.filter.SlewRateLimiter; 
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -19,6 +20,7 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -64,7 +66,9 @@ public class Drive extends SubsystemBase {
       };
   private SwerveDrivePoseEstimator poseEstimator =
       new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, Pose2d.kZero);
-
+   private final SlewRateLimiter xLimiter = new SlewRateLimiter(3.0);
+  private final SlewRateLimiter yLimiter = new SlewRateLimiter(3.0);
+  private final SlewRateLimiter rotLimiter = new SlewRateLimiter(3.0);
   public Drive(
       GyroIO gyroIO,
       ModuleIO flModuleIO,
@@ -181,8 +185,15 @@ public class Drive extends SubsystemBase {
    * @param speeds Speeds in meters/sec
    */
   public void runVelocity(ChassisSpeeds speeds) {
-    // Calculate module setpoints
-    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
+   // adding the slew rate limiter 
+     ChassisSpeeds limitedSpeeds = new ChassisSpeeds(
+        xLimiter.calculate(speeds.vxMetersPerSecond),
+        yLimiter.calculate(speeds.vyMetersPerSecond),
+        rotLimiter.calculate(speeds.omegaRadiansPerSecond)
+    );
+
+    // calculate module setpoints
+    ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(limitedSpeeds, 0.02);
     SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
     SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, maxSpeedMetersPerSec);
 
